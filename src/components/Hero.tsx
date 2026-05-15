@@ -377,6 +377,10 @@ export default function Hero() {
             letterSpacing: "-0.025em", color: "#fff",
             marginBottom: "1.25rem",
           }}>
+            {/* Always-visible text for SEO crawlers (static HTML) */}
+            <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap" }}>
+              Where Ambition Finds Its Space
+            </span>
             {loaded && [
               { w: "Where",    d: "0.18s", gold: false },
               { w: "Ambition", d: "0.30s", gold: false },
@@ -386,6 +390,7 @@ export default function Hero() {
             ].map(({ w, d, gold }) => (
               <span
                 key={w}
+                aria-hidden="true"
                 style={{
                   display: "inline-block", marginRight: "0.28em",
                   animation: `wordReveal 1s cubic-bezier(0.16,1,0.3,1) ${d} both`,
