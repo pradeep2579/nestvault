@@ -121,7 +121,7 @@ export default function Amenities() {
   const { ref: photoRef,  inView: photoIn  } = useInView();
 
   return (
-    <section id="amenities" style={{ background: "#0a0a0a", color: "white", overflow: "hidden" }}>
+    <section id="amenities" style={{ background: "#051650", color: "white", overflow: "hidden" }}>
 
       {/* ── Header ── */}
       <div className="container" style={{ paddingTop: "clamp(4rem,8vw,7rem)", paddingBottom: "clamp(2.5rem,5vw,4rem)" }}>

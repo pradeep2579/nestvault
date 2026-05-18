@@ -29,14 +29,14 @@ export default function Location() {
   const { ref, inView } = useInView();
 
   return (
-    <section id="location" className="section-pad" style={{ background: "var(--warm-white)" }}>
+    <section id="location" className="section-pad" style={{ background: "#071e6b" }}>
       <div className="container">
         <div className="location-grid" ref={ref}>
 
           {/* Left — text */}
           <div style={{ opacity: inView ? 1 : 0, transform: inView ? "none" : "translateX(-24px)", transition: "opacity 0.7s ease, transform 0.7s ease" }}>
             <div className="divider-gold" style={{ marginBottom: "1.25rem" }} />
-            <p className="label" style={{ color: "#8b6914", marginBottom: "0.875rem" }}>Find Us</p>
+            <p className="label" style={{ color: "#c9a84c", marginBottom: "0.875rem" }}>Find Us</p>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "rgba(139,105,20,0.1)", border: "1px solid rgba(201,168,76,0.3)", borderRadius: "2px", padding: "0.3rem 0.75rem", marginBottom: "0.875rem" }}>
               <span style={{ fontSize: "0.75rem" }}>🚇</span>
               <span style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#8b6914" }}>Near Madhapur Metro Station</span>

@@ -60,7 +60,7 @@ const features = [
 export default function About() {
   const { ref, inView } = useInView();
   return (
-    <section id="about" className="section-pad" style={{ background: "#0a0a0a", color: "white" }}>
+    <section id="about" className="section-pad" style={{ background: "#051650", color: "white" }}>
       <div className="container">
         <div className="about-grid" ref={ref}>
 

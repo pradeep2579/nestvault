@@ -234,7 +234,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#050505" }}>
+    <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#051650" }}>
 
       {/* ─── keyframe styles ─── */}
       <style>{`

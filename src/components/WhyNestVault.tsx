@@ -97,13 +97,13 @@ export default function WhyNestVault() {
   const { ref: headerRef, inView: headerIn } = useInView();
 
   return (
-    <section id="why" style={{ background: "var(--warm-white)", overflow: "hidden" }}>
+    <section id="why" style={{ background: "#071e6b", overflow: "hidden" }}>
 
       {/* Header */}
       <div className="container" style={{ paddingTop: "clamp(4rem,8vw,7rem)" }}>
         <div ref={headerRef} style={{ maxWidth: "700px" }}>
           <div className="divider-gold" style={{ marginBottom: "1.25rem" }} />
-          <p className="label" style={{ color: "#8b6914", marginBottom: "1.1rem" }}>Why Choose Us</p>
+          <p className="label" style={{ color: "#c9a84c", marginBottom: "1.1rem" }}>Why Choose Us</p>
           <h2
             className="h-section"
             style={{
@@ -113,7 +113,7 @@ export default function WhyNestVault() {
               transition: "opacity 0.7s ease, transform 0.7s ease",
             }}
           >
-            Why <em style={{ fontStyle: "italic", color: "#8b6914" }}>Nest Vault</em>
+            Why <em style={{ fontStyle: "italic", color: "#c9a84c" }}>Nest Vault</em>
             <br />Co-working Spaces?
           </h2>
         </div>
@@ -155,17 +155,17 @@ export default function WhyNestVault() {
           font-family: -apple-system, sans-serif;
           font-size: 0.78rem;
           font-weight: 500;
-          color: #8b6914;
-          background: rgba(139,105,20,0.08);
-          border: 1px solid rgba(139,105,20,0.2);
+          color: #e8c97a;
+          background: rgba(201,168,76,0.1);
+          border: 1px solid rgba(201,168,76,0.25);
           padding: 0.35rem 0.875rem;
           border-radius: 2px;
           letter-spacing: 0.04em;
           transition: all 0.25s ease;
         }
         .why-tag:hover {
-          background: rgba(139,105,20,0.14);
-          border-color: rgba(139,105,20,0.4);
+          background: rgba(201,168,76,0.18);
+          border-color: rgba(201,168,76,0.45);
         }
 
         @media (max-width: 768px) {

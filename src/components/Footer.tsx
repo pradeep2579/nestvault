@@ -6,7 +6,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer style={{ background: "#050505", color: "white", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+    <footer style={{ background: "#051650", color: "white", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
       <div className="container">
         <div className="footer-grid">
 

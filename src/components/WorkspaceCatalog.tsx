@@ -326,7 +326,7 @@ export default function WorkspaceCatalog() {
   return (
     <section
       id="workspaces"
-      style={{ background: "#050505", color: "white", position: "relative", overflow: "hidden" }}
+      style={{ background: "#051650", color: "white", position: "relative", overflow: "hidden" }}
     >
       {/* ── GLSL Hills background ── */}
       <div style={{

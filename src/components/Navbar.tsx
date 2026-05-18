@@ -122,11 +122,11 @@ export default function Navbar() {
         .nv-nav {
           position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
           /* Always keep a bottom gradient scrim so logo + links always read cleanly */
-          background: linear-gradient(180deg, rgba(5,5,5,0.72) 0%, rgba(5,5,5,0.3) 80%, transparent 100%);
+          background: linear-gradient(180deg, rgba(5,22,80,0.88) 0%, rgba(5,22,80,0.4) 80%, transparent 100%);
           transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
         }
         .nv-nav--scrolled {
-          background: rgba(5,5,5,0.94);
+          background: rgba(5,22,80,0.97);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
           box-shadow: 0 1px 0 rgba(255,255,255,0.05);
@@ -217,7 +217,7 @@ export default function Navbar() {
         }
         .nv-nav__drawer {
           display: flex; flex-direction: column;
-          background: rgba(5,5,5,0.97);
+          background: rgba(5,22,80,0.98);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
           border-top: 1px solid rgba(255,255,255,0.06);

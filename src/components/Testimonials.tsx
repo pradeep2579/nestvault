@@ -30,13 +30,13 @@ export default function Testimonials() {
   const [active, setActive] = useState(0);
 
   return (
-    <section id="community" className="section-pad" style={{ background: "var(--warm-white)" }}>
+    <section id="community" className="section-pad" style={{ background: "#071e6b" }}>
       <div className="container">
 
         {/* Header */}
         <div ref={ref} style={{ marginBottom: "clamp(2rem,5vw,3.5rem)" }}>
           <div className="divider-gold" style={{ marginBottom: "1.25rem" }} />
-          <p className="label" style={{ color: "#8b6914", marginBottom: "0.875rem" }}>Member Stories</p>
+          <p className="label" style={{ color: "#c9a84c", marginBottom: "0.875rem" }}>Member Stories</p>
           <h2
             className="h-section"
             style={{
@@ -45,7 +45,7 @@ export default function Testimonials() {
               transition: "opacity 0.7s ease, transform 0.7s ease",
             }}
           >
-            Trusted by <em style={{ fontStyle: "italic", color: "#8b6914" }}>Hyderabad&apos;s</em>
+            Trusted by <em style={{ fontStyle: "italic", color: "#c9a84c" }}>Hyderabad&apos;s</em>
             <br />best builders
           </h2>
         </div>
@@ -140,19 +140,19 @@ export default function Testimonials() {
           display: flex;
           flex-direction: column;
           gap: 1px;
-          background: var(--border);
-          border: 1px solid var(--border);
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.1);
         }
         .testi-author {
           display: flex; align-items: center; gap: 0.875rem;
           padding: 1rem 1.25rem;
-          background: var(--warm-white);
+          background: rgba(7,30,107,0.6);
           border: none; border-left: 3px solid transparent;
           cursor: pointer; text-align: left;
           transition: all 0.3s ease;
         }
         .testi-author--active {
-          background: white;
+          background: rgba(255,255,255,0.1);
           border-left-color: var(--author-color, #c9a84c);
         }
         .testi-author__avatar {
@@ -177,7 +177,7 @@ export default function Testimonials() {
             border: 1px solid var(--border); border-left: 1px solid var(--border);
             border-radius: 4px; gap: 0.5rem;
           }
-          .testi-author--active { border-color: var(--author-color, #c9a84c); background: white; }
+          .testi-author--active { border-color: var(--author-color, #c9a84c); background: rgba(255,255,255,0.1); }
           .testi-author__info div:last-child { display: none; }
         }
         @media (max-width: 480px) {

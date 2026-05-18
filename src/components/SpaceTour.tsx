@@ -46,7 +46,7 @@ export default function SpaceTour() {
   return (
     <section
       style={{
-        background: "#050505",
+        background: "#051650",
         padding: "clamp(4rem,8vw,7rem) 0",
         overflow: "hidden",
       }}
@@ -112,7 +112,7 @@ export default function SpaceTour() {
             playsInline
             preload="metadata"
             onEnded={() => setPlaying(false)}
-            style={{ width: "100%", display: "block", aspectRatio: "16/9", objectFit: "cover", background: "#111" }}
+            style={{ width: "100%", display: "block", aspectRatio: "16/9", objectFit: "cover", background: "#051650" }}
           />
 
           {/* Play overlay — shown when paused */}

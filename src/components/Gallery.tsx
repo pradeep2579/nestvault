@@ -91,7 +91,7 @@ export default function Gallery() {
   const [lightbox, setLightbox] = useState<number | null>(null);
 
   return (
-    <section id="gallery" className="section-pad" style={{ background: "#0a0a0a", color: "white" }}>
+    <section id="gallery" className="section-pad" style={{ background: "#051650", color: "white" }}>
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
         {/* Header */}
         <div ref={ref} style={{ textAlign: "center", marginBottom: "4rem" }}>

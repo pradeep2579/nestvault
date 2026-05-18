@@ -74,7 +74,7 @@ export default function Contact() {
     (e.target.style.borderColor = "rgba(255,255,255,0.1)");
 
   return (
-    <section id="contact" className="section-pad" style={{ background:"#0a0a0a", color:"white" }}>
+    <section id="contact" className="section-pad" style={{ background:"#051650", color:"white" }}>
       <div className="container">
         <div className="contact-grid" ref={ref}>
 

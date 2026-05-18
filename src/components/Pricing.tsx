@@ -80,7 +80,7 @@ export default function Pricing() {
   const { ref, inView } = useInView();
 
   return (
-    <section id="pricing" className="section-pad" style={{ background: "linear-gradient(180deg,#0a0a0a,#0d0d0d)", color: "white" }}>
+    <section id="pricing" className="section-pad" style={{ background: "linear-gradient(180deg,#051650,#061a5e)", color: "white" }}>
       <div className="container">
 
         {/* Header */}
