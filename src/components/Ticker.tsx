@@ -14,7 +14,7 @@ const items = [
   "Founder Community",
   "Business Address",
   "180m from Metro",
-  "Jubilee Hills",
+  "Near Madhapur Metro Station",
 ];
 
 export default function Ticker() {

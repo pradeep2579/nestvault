@@ -73,7 +73,7 @@ export default function About() {
               <span className="text-gold-gradient">elevates ambition</span>
             </h2>
             <p style={{ fontFamily: "-apple-system,sans-serif", fontSize: "clamp(0.875rem,1.5vw,1rem)", lineHeight: 1.85, color: "rgba(255,255,255,0.55)", marginBottom: "1rem", fontWeight: 300 }}>
-              Nest Vault was born from a simple conviction: the space where you work shapes the quality of your thinking. Nestled 180 metres from Madhapur Metro Station in Jubilee Hills, we have crafted an environment that merges luxury hospitality with intelligent workspace infrastructure.
+              Nest Vault was born from a simple conviction: the space where you work shapes the quality of your thinking. Nestled right next to Madhapur Metro Station (180m), Jubilee Hills, we have crafted an environment that merges luxury hospitality with intelligent workspace infrastructure.
             </p>
             <p style={{ fontFamily: "-apple-system,sans-serif", fontSize: "clamp(0.875rem,1.5vw,1rem)", lineHeight: 1.85, color: "rgba(255,255,255,0.55)", fontWeight: 300 }}>
               Italian marble accents, designer lighting, and ergonomic furnishings coexist with enterprise-grade connectivity, 24×7 access, and a thriving community of founders, creators, and teams.

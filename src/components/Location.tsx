@@ -20,7 +20,7 @@ function useInView(threshold = 0.1) {
 
 const details = [
   { icon: "🚇", title: "Metro Access",  detail: "180m walk from Madhapur Metro Station (Blue Line)" },
-  { icon: "📍", title: "Address",       detail: "Road No. 36, Jubilee Hills, Hyderabad – 500033" },
+  { icon: "📍", title: "Address",       detail: "Near Madhapur Metro Station, Jubilee Hills, Road No. 36, Hyderabad – 500033" },
   { icon: "🕐", title: "Hours",         detail: "24 × 7 member access · Reception 9 AM – 9 PM Mon–Sat" },
   { icon: "🚗", title: "Parking",       detail: "Basement parking for cars & two-wheelers" },
 ];
@@ -37,12 +37,16 @@ export default function Location() {
           <div style={{ opacity: inView ? 1 : 0, transform: inView ? "none" : "translateX(-24px)", transition: "opacity 0.7s ease, transform 0.7s ease" }}>
             <div className="divider-gold" style={{ marginBottom: "1.25rem" }} />
             <p className="label" style={{ color: "#8b6914", marginBottom: "0.875rem" }}>Find Us</p>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "rgba(139,105,20,0.1)", border: "1px solid rgba(201,168,76,0.3)", borderRadius: "2px", padding: "0.3rem 0.75rem", marginBottom: "0.875rem" }}>
+              <span style={{ fontSize: "0.75rem" }}>🚇</span>
+              <span style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#8b6914" }}>Near Madhapur Metro Station</span>
+            </div>
             <h2 className="h-section" style={{ color: "var(--text-primary)", marginBottom: "1.25rem" }}>
               In the heart of{" "}
               <span className="text-gold-gradient">Jubilee Hills</span>
             </h2>
             <p style={{ fontFamily: "-apple-system,sans-serif", fontSize: "clamp(0.875rem,1.5vw,1rem)", lineHeight: 1.85, color: "var(--text-secondary)", fontWeight: 300, marginBottom: "2rem" }}>
-              Strategically located 180 metres from Madhapur Metro Station, Nest Vault sits in Hyderabad&apos;s most coveted business district — surrounded by leading tech companies, premium restaurants, and excellent transport links.
+              Near Madhapur Metro Station (just 180m walk), Nest Vault sits in Hyderabad&apos;s most coveted business district — surrounded by leading tech companies, premium restaurants, and excellent transport links.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "1.125rem", marginBottom: "2rem" }}>
@@ -90,7 +94,7 @@ export default function Location() {
               borderRadius: "4px", border: "1px solid rgba(201,168,76,0.25)",
             }}>
               <div style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.6rem", letterSpacing: "0.16em", color: "#c9a84c", textTransform: "uppercase", marginBottom: "0.15rem" }}>Nest Vault</div>
-              <div style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.78rem", color: "white", fontWeight: 600 }}>Jubilee Hills, Hyderabad</div>
+              <div style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.78rem", color: "white", fontWeight: 600 }}>Near Madhapur Metro · Jubilee Hills</div>
             </div>
           </div>
         </div>

@@ -364,7 +364,7 @@ export default function Hero() {
                 color: "#c9a84c", textTransform: "uppercase",
               }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#c9a84c", animation: "dotPulse 2s ease-in-out infinite" }} />
-                Now Open · Jubilee Hills, Hyderabad
+                Now Open · Near Madhapur Metro Station, Hyderabad
               </div>
             </div>
           )}
@@ -417,8 +417,8 @@ export default function Hero() {
               animation: "fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.88s both",
             }}>
               Hyderabad&apos;s most refined co-working ecosystem — private cabins,
-              dedicated desks, meeting suites, and a vibrant founder community at
-              Jubilee Hills.
+              dedicated desks, meeting suites, and a vibrant founder community.
+              Near Madhapur Metro Station, Jubilee Hills.
             </p>
           )}
 
@@ -436,6 +436,22 @@ export default function Hero() {
               </a>
               <a href="#workspaces" className="btn-outline" style={{ fontSize: "0.82rem", padding: "1rem 2.25rem" }}>
                 Explore Spaces
+              </a>
+            </div>
+          )}
+
+          {/* Phone number */}
+          {loaded && (
+            <div style={{ animation: "fadeInUp 0.8s cubic-bezier(0.16,1,0.3,1) 1.15s both", marginTop: "1.25rem" }}>
+              <a href="tel:+919142696666" style={{
+                display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                fontFamily: "-apple-system, sans-serif", fontSize: "0.85rem",
+                color: "#c9a84c", textDecoration: "none", fontWeight: 500,
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.05 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+                </svg>
+                +91 91426 96666
               </a>
             </div>
           )}

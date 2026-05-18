@@ -7,6 +7,7 @@ import Amenities from "@/components/Amenities";
 import WhyNestVault from "@/components/WhyNestVault";
 import Pricing from "@/components/Pricing";
 import Gallery from "@/components/Gallery";
+import SpaceTour from "@/components/SpaceTour";
 import Testimonials from "@/components/Testimonials";
 import Location from "@/components/Location";
 import Contact from "@/components/Contact";
@@ -25,7 +26,7 @@ const jsonLd = {
         "Hyderabad's most prestigious co-working ecosystem. Private cabins, dedicated desks, meeting rooms, and virtual offices near Madhapur Metro, Jubilee Hills.",
       url: "https://nestvault.in",
       telephone: "+919142696666",
-      email: "hello@nestvault.in",
+      email: "community@nestvault.in",
       image: "https://nestvault.in/images/lounge-wide.jpg",
       logo: "https://nestvault.in/images/logo-full.png",
       priceRange: "₹₹",
@@ -125,6 +126,7 @@ export default function HomePage() {
         <WhyNestVault />
         <Pricing />
         <Gallery />
+        <SpaceTour />
         <Testimonials />
         <Location />
         <Contact />

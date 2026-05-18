@@ -107,9 +107,9 @@ export default function Footer() {
               links: [
                 { label: "Book a Tour",          href: "#contact"                        },
                 { label: "+91 91426 96666",       href: "tel:+919142696666"               },
-                { label: "hello@nestvault.in",    href: "mailto:hello@nestvault.in"       },
+                { label: "community@nestvault.in",    href: "mailto:community@nestvault.in"       },
                 { label: "WhatsApp Us",           href: "https://wa.me/919142696666"      },
-                { label: "Road No. 36, Jubilee Hills", href: "#location"                 },
+                { label: "Near Madhapur Metro, Road No. 36, Jubilee Hills", href: "#location"                 },
               ],
             },
           ].map(({ heading, links }) => (
@@ -131,7 +131,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="footer-bottom">
           <p style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.72rem", color: "rgba(255,255,255,0.18)" }}>
-            © {year} Nest Vault Co-working Space. All rights reserved. · Jubilee Hills, Hyderabad.
+            © {year} Nest Vault Co-working Space. All rights reserved. · Near Madhapur Metro Station, Hyderabad.
           </p>
           <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
             {["Privacy Policy", "Terms of Service", "Refund Policy"].map(l => (

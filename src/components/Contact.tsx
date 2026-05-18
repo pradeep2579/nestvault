@@ -93,8 +93,8 @@ export default function Contact() {
             <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem" }}>
               {[
                 { icon:"📞", label:"Call / WhatsApp", value:"+91 91426 96666", href:"tel:+919142696666" },
-                { icon:"✉️", label:"Email",           value:"hello@nestvault.in", href:"mailto:hello@nestvault.in" },
-                { icon:"📍", label:"Address",         value:"Road No. 36, Jubilee Hills, Hyderabad", href:"#location" },
+                { icon:"✉️", label:"Email",           value:"community@nestvault.in", href:"mailto:community@nestvault.in" },
+                { icon:"📍", label:"Address",         value:"Near Madhapur Metro Station, Road No. 36, Jubilee Hills, Hyderabad", href:"#location" },
               ].map(({ icon, label, value, href }) => (
                 <a key={label} href={href} style={{ display:"flex", alignItems:"center", gap:"0.875rem", textDecoration:"none", color:"inherit" }}>
                   <div style={{ width:38, height:38, borderRadius:"2px", border:"1px solid rgba(201,168,76,0.18)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1rem", flexShrink:0 }}>

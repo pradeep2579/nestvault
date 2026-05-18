@@ -28,7 +28,7 @@ const reasons = [
       "Hyderabad-based Nest Vault Coworking is strategically located next to the Madhapur Metro Station, offering excellent connectivity and convenience. We provide a range of flexible workspace plans designed to suit the diverse needs of freelancers, entrepreneurs, startup incubators, and small to medium-sized enterprises.",
       "Our coworking space combines comfort, accessibility, and a professional environment to help individuals and businesses work, collaborate, and grow efficiently.",
     ],
-    tags: ["180m from Metro", "Road No. 36 Jubilee Hills", "24/7 Access", "360+ days a year"],
+    tags: ["Near Madhapur Metro Station", "Road No. 36 Jubilee Hills", "24/7 Access", "360+ days a year"],
   },
   {
     num: "02",
