@@ -64,7 +64,7 @@ export default function Location() {
             </div>
 
             <a
-              href="https://maps.google.com/?q=Road+No+36+Jubilee+Hills+Hyderabad"
+              href="https://www.google.com/maps/place/Nest+Vault+Coworking+space/@17.4353397,78.3988657,17z/data=!3m1!4b1!4m6!3m5!1s0x3bcb9177b8e748bf:0x65432d6fc2820c1e!8m2!3d17.4353397!4d78.4014406!16s%2Fg%2F11w4446209?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D"
               target="_blank" rel="noopener noreferrer"
               className="btn-gold"
             >
@@ -81,7 +81,7 @@ export default function Location() {
             style={{ opacity: inView ? 1 : 0, transform: inView ? "none" : "translateX(24px)", transition: "opacity 0.7s ease 0.2s, transform 0.7s ease 0.2s" }}
           >
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30451.938637440267!2d78.39557237431642!3d17.43264990000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb90c4a3b3c407%3A0xfba2a63e8fd29c3a!2sJubilee%20Hills%2C%20Hyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1714904800000!5m2!1sen!2sin"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.119!2d78.3988657!3d17.4353397!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9177b8e748bf%3A0x65432d6fc2820c1e!2sNest%20Vault%20Coworking%20space!5e0!3m2!1sen!2sin!4v1716000000000!5m2!1sen!2sin"
               width="100%" height="100%"
               style={{ border: 0, display: "block", filter: "grayscale(15%) contrast(1.08)" }}
               allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"

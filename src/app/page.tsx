@@ -73,7 +73,7 @@ const jsonLd = {
         "https://youtube.com/@nestvault",
         "https://www.threads.net/@nest_vault",
       ],
-      hasMap: "https://maps.google.com/?q=Nest+Vault+Jubilee+Hills+Hyderabad",
+      hasMap: "https://www.google.com/maps/place/Nest+Vault+Coworking+space/@17.4353397,78.3988657,17z/data=!3m1!4b1!4m6!3m5!1s0x3bcb9177b8e748bf:0x65432d6fc2820c1e!8m2!3d17.4353397!4d78.4014406",
       areaServed: {
         "@type": "City",
         name: "Hyderabad",
