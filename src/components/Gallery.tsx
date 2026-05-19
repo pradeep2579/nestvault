@@ -61,10 +61,24 @@ const photos = [
     height: 360,
   },
   {
+    src: "/images/play-zone.jpg",
+    label: "Play Zone",
+    desc: "Unwind between sessions — carrom, foosball, chess, bean bags, and more. Work hard, play harder.",
+    span: "col-span-2",
+    height: 360,
+  },
+  {
     src: "/images/logo-wall.jpg",
     label: "The Signature Wall",
     desc: "Our iconic gold orbital sculpture in a backlit arch — a statement that sets the tone.",
     span: "col-span-1",
+    height: 360,
+  },
+  {
+    src: "/images/play-zone-2.jpg",
+    label: "Play Zone",
+    desc: "Bean bags, board games, and open space to recharge — because the best ideas come after a break.",
+    span: "col-span-2",
     height: 360,
   },
 ];
