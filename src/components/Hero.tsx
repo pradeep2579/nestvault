@@ -463,7 +463,7 @@ export default function Hero() {
               style={{ animation: "fadeInUp 0.8s cubic-bezier(0.16,1,0.3,1) 1.25s both" }}
             >
               {[
-                { value: "500+", label: "Seats Available" },
+                { value: "250+", label: "Seats Available" },
                 { value: "24/7", label: "Access" },
                 { value: "180m", label: "From Metro" },
                 { value: "50+",  label: "Member Companies" },

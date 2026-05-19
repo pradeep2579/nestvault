@@ -76,7 +76,12 @@ export default function Navbar() {
               );
             })}
             <div className="nv-nav__divider" />
-            <a href="tel:+919142696666" className="nv-nav__phone">+91 91426 96666</a>
+            <a href="tel:+919142696666" className="nv-nav__phone">
+              <svg className="nv-nav__phone-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.05 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+              +91 91426 96666
+            </a>
             <a href="#contact" className="btn-gold nv-nav__cta">Book a Tour</a>
           </div>
 
@@ -195,12 +200,35 @@ export default function Navbar() {
         .nv-nav__link:hover,
         .nv-nav__link--active { color: #c9a84c; border-bottom-color: #c9a84c; }
         .nv-nav__divider { width:1px; height:14px; background:rgba(255,255,255,0.1); }
-        .nv-nav__phone {
-          font-family: -apple-system,sans-serif; font-size: 0.68rem;
-          color: rgba(255,255,255,0.45); text-decoration: none;
-          transition: color 0.2s ease; white-space: nowrap;
+        @keyframes phoneRing {
+          0%   { transform: rotate(0deg); }
+          10%  { transform: rotate(12deg); }
+          20%  { transform: rotate(-10deg); }
+          30%  { transform: rotate(10deg); }
+          40%  { transform: rotate(-8deg); }
+          50%  { transform: rotate(0deg); }
+          100% { transform: rotate(0deg); }
         }
-        .nv-nav__phone:hover { color: #c9a84c; }
+        @keyframes phonePulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.45); }
+          50%       { box-shadow: 0 0 0 6px rgba(201,168,76,0); }
+        }
+        .nv-nav__phone {
+          display: inline-flex; align-items: center; gap: 0.45rem;
+          font-family: -apple-system,sans-serif; font-size: 0.72rem;
+          font-weight: 600; letter-spacing: 0.04em;
+          color: #c9a84c; text-decoration: none;
+          border: 1px solid rgba(201,168,76,0.35);
+          padding: 0.35rem 0.75rem; border-radius: 2px;
+          transition: all 0.2s ease; white-space: nowrap;
+          animation: phonePulse 2.5s ease-in-out infinite;
+        }
+        .nv-nav__phone-icon {
+          animation: phoneRing 3s ease-in-out infinite;
+          transform-origin: center;
+        }
+        .nv-nav__phone:hover { color: #e8c97a; border-color: rgba(201,168,76,0.7); background: rgba(201,168,76,0.08); animation: none; }
+        .nv-nav__phone:hover .nv-nav__phone-icon { animation: phoneRing 0.4s ease-in-out; }
         .nv-nav__cta { padding: 0.55rem 1.25rem !important; font-size: 0.65rem !important; }
 
         /* Hamburger */

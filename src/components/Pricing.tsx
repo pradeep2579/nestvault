@@ -147,10 +147,7 @@ export default function Pricing() {
 
               {/* Conditions note */}
               {note && (
-                <div style={{ marginBottom: "1.25rem", padding: "0.5rem 0.75rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "2px", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="rgba(255,255,255,0.25)"/><path d="M6 5v4M6 3.5v.5" stroke="rgba(255,255,255,0.4)" strokeWidth="1" strokeLinecap="round"/></svg>
-                  <span style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.04em" }}>{note}</span>
-                </div>
+                <p style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.6rem", color: "rgba(255,255,255,0.28)", marginBottom: "1rem", letterSpacing: "0.02em" }}>*conditions apply</p>
               )}
 
               <a
@@ -175,7 +172,7 @@ export default function Pricing() {
               * Conditions Apply
             </p>
             <p style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.78rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.6 }}>
-              All monthly plans are based on 10 hours per day usage, 5-day week (Mon–Sat). Additional hours and weekend access available on request. All prices exclusive of GST. Annual plans receive 15% discount.
+              All monthly plans are based on 10 hours per day usage, 5-day week (Mon–Fri). Additional hours and weekend access available on request. All prices exclusive of GST. Annual plans receive 15% discount.
             </p>
           </div>
         </div>
