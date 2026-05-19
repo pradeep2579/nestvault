@@ -33,7 +33,7 @@ export default function SpaceTour() {
     const startTime = performance.now();
     function step(now: number) {
       const t = Math.min((now - startTime) / duration, 1);
-      audio.volume = start + (target - start) * t;
+      if (audioRef.current) audioRef.current.volume = start + (target - start) * t;
       if (t < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
