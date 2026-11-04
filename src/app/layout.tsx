@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AnalyticsScripts from "@/components/AnalyticsScripts";
 
 const SITE_URL = "https://nestvault.in";
 
@@ -79,7 +80,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <body className="min-h-full flex flex-col antialiased">{children}
+        {process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID && <AnalyticsScripts id={process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID} />}
+      </body>
     </html>
   );
 }

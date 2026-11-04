@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
   const year = new Date().getFullYear();
 
   return (
@@ -100,6 +102,7 @@ export default function Footer() {
                 { label: "Gallery",    href: "#gallery"    },
                 { label: "Community",  href: "#community"  },
                 { label: "Location",   href: "#location"   },
+                { label: "Blog", href: "/blog" },
               ],
             },
             {
@@ -120,7 +123,7 @@ export default function Footer() {
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 {links.map(({ label, href }) => (
                   <li key={label}>
-                    <a href={href} className="footer-link">{label}</a>
+                    <a href={href.startsWith("#") && pathname !== "/" ? `/${href}` : href} className="footer-link">{label}</a>
                   </li>
                 ))}
               </ul>
