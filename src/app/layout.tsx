@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AnalyticsScripts from "@/components/AnalyticsScripts";
+import { Analytics } from "@vercel/analytics/next";
 
 const SITE_URL = "https://nestvault.in";
 
@@ -82,6 +83,7 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col antialiased">{children}
         {process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID && <AnalyticsScripts id={process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID} />}
+        <Analytics />
       </body>
     </html>
   );
