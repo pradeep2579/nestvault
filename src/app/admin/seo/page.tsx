@@ -22,8 +22,8 @@ export default async function SeoPage({ searchParams }: Props) {
     <section className="admin-card" style={{ marginTop: "1.5rem" }}><h2>Redirects</h2><form action={addRedirect} className="admin-form">
       <label>Old path<input name="source_path" required placeholder="/old-page" /></label><label>New path<input name="destination_path" required placeholder="/blog" /></label>
       <label style={{ display: "flex", alignItems: "center" }}><input name="permanent" type="checkbox" defaultChecked style={{ width: "auto" }} /> Permanent (301)</label><button>Add redirect</button>
-    </form><table className="admin-table" style={{ marginTop: "1rem" }}><thead><tr><th>From</th><th>To</th><th>Type</th><th></th></tr></thead><tbody>
+    </form><div className="admin-table-scroll" role="region" aria-label="Redirects table" tabIndex={0} style={{ marginTop: "1rem" }}><table className="admin-table"><thead><tr><th>From</th><th>To</th><th>Type</th><th></th></tr></thead><tbody>
       {(redirects || []).map(item => <tr key={item.id}><td>{item.source_path}</td><td>{item.destination_path}</td><td>{item.permanent ? "301" : "302"}</td>
         <td><form action={removeRedirect}><input type="hidden" name="id" value={item.id} /><button className="admin-button">Remove</button></form></td></tr>)}
-    </tbody></table></section></>;
+    </tbody></table></div></section></>;
 }
