@@ -7,7 +7,7 @@ type Props = { searchParams: Promise<{ error?: string; saved?: string }> };
 export default async function SeoPage({ searchParams }: Props) {
   await requirePageActor(true);
   const [seo, { data: redirects }, query] = await Promise.all([homeSeo(), db().from("redirects").select("*").order("created_at", { ascending: false }), searchParams]);
-  return <><h1>SEO settings</h1>{query.saved && <p className="admin-success">Changes saved.</p>}
+  return <><div className="admin-page-heading"><p className="admin-eyebrow">SEARCH PRESENCE</p><h1>SEO settings</h1><p>Shape how Nest Vault appears in search results and social shares.</p></div>{query.saved && <p className="admin-success">Changes saved.</p>}
     {query.error && <p className="admin-error">{({ json: "Business schema must be valid JSON.", path: "Use different local paths without query strings.", loop: "This redirect would make a loop.", duplicate: "That source path already exists." } as Record<string,string>)[query.error] || "Could not save."}</p>}
     <section className="admin-card"><h2>Homepage search appearance</h2><form action={saveHomeSeo} className="admin-form">
       <label>SEO title<input name="title" required defaultValue={seo.title} /></label>

@@ -17,13 +17,13 @@ export default async function LeadsPage({ searchParams }: Props) {
   if (error) throw error;
   const leads = data || [];
   const pageUrl = (n: number) => `/admin/leads?${new URLSearchParams({ q, stage, page: String(n) })}`;
-  return <><h1>Leads & tours</h1><form className="admin-row" method="get">
+  return <><div className="admin-page-heading"><p className="admin-eyebrow">RELATIONSHIPS</p><h1>Leads & tours</h1><p>Every enquiry, follow-up, and visit in one clear pipeline.</p></div><form className="admin-row admin-filter-bar" method="get">
     <input name="q" defaultValue={q} placeholder="Search name, email, phone" aria-label="Search leads" />
     <select name="stage" defaultValue={stage} aria-label="Filter stage"><option value="">All stages</option>{stages.map(s => <option key={s} value={s}>{s.replaceAll("_", " ")}</option>)}</select>
     <button className="admin-button">Filter</button></form>
     <div className="admin-card" style={{ padding: 0, overflow: "hidden" }}><table className="admin-table"><thead><tr><th>Name</th><th>Interest</th><th>Stage</th><th>Received</th><th>Next action</th></tr></thead><tbody>
       {leads.map(lead => <tr key={lead.id}><td><Link className="admin-link" href={`/admin/leads/${lead.id}`}>{lead.name}</Link><br /><small>{lead.email}</small></td>
-        <td>{lead.interest || "—"}</td><td>{lead.stage.replaceAll("_", " ")}</td><td>{new Date(lead.created_at).toLocaleDateString("en-IN")}</td>
+        <td>{lead.interest || "—"}</td><td><span className={`admin-status admin-status--${lead.stage}`}>{lead.stage.replaceAll("_", " ")}</span></td><td>{new Date(lead.created_at).toLocaleDateString("en-IN")}</td>
         <td>{lead.follow_up_at ? `Follow up ${new Date(lead.follow_up_at).toLocaleString("en-IN")}` : lead.tour_at ? `Tour ${new Date(lead.tour_at).toLocaleString("en-IN")}` : "—"}</td></tr>)}
     </tbody></table>{!leads.length && <p style={{ padding: "1rem" }}>No matching leads.</p>}</div>
     <div className="admin-row" style={{ marginTop: "1rem" }}><span>{count ?? 0} matching leads</span>

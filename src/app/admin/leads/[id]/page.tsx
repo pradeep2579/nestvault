@@ -18,7 +18,7 @@ export default async function LeadDetail({ params, searchParams }: Props) {
     client.from("profiles").select("id,email").order("email"),
   ]);
   if (!lead) notFound();
-  return <><div className="admin-row"><Link className="admin-link" href="/admin/leads">← Leads</Link></div><h1>{lead.name}</h1>
+  return <><div className="admin-row"><Link className="admin-link" href="/admin/leads">← Leads</Link></div><div className="admin-page-heading"><p className="admin-eyebrow">ENQUIRY DETAILS</p><h1>{lead.name}</h1><p>Review the conversation and plan the next step.</p></div>
     {(await searchParams).saved && <p className="admin-success">Saved.</p>}
     <div className="admin-grid" style={{ gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr)" }}>
       <section className="admin-card"><h2>Lead details</h2><p><strong>Email:</strong> <a href={`mailto:${lead.email}`}>{lead.email}</a></p>

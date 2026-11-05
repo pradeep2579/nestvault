@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { actor } from "@/lib/supabase";
 import { signIn } from "./actions";
+import Image from "next/image";
 import "@/app/admin/admin.css";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,7 @@ export default async function Login({ searchParams }: Props) {
   if (current) redirect("/admin");
   const { error } = await searchParams;
   return <main className="admin-login"><form action={signIn} className="admin-login-card">
-    <p className="label">Nest Vault</p><h1>Admin sign in</h1>
+    <div className="admin-login-brand"><Image src="/images/logo-icon.png" alt="" width={50} height={42} /><span>Nest Vault<small>WORKSPACE ADMIN</small></span></div><p className="label">YOUR WORKSPACE</p><h1>Welcome back.</h1>
     {error && <p role="alert" className="admin-error">{error === "config" ? "Supabase is not configured." : "Invalid credentials or no admin access."}</p>}
     {!process.env.NEXT_PUBLIC_SUPABASE_URL && <p className="admin-error">Supabase is not configured. See README.md.</p>}
     <label>Email<input name="email" type="email" required autoComplete="username" /></label>

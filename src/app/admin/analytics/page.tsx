@@ -42,7 +42,7 @@ export default async function Analytics({ searchParams }: Props) {
       }
     } catch (error) { searchError = gaError = error instanceof Error ? error.message : "Google connection failed"; }
   }
-  return <><h1>Analytics</h1>
+  return <><div className="admin-page-heading"><p className="admin-eyebrow">PERFORMANCE</p><h1>Analytics</h1><p>Understand search visibility, traffic, and saved enquiries.</p></div>
     {query.connected && <p className="admin-success">Google connected. Select your properties below.</p>}
     {query.saved && <p className="admin-success">Properties saved.</p>}
     {query.disconnected && <p className="admin-success">Google disconnected.</p>}

@@ -38,7 +38,7 @@ export default function AcceptInvite() {
     const { error } = await client.auth.updateUser({ password });
     if (error) setError(error.message); else { router.replace("/admin"); router.refresh(); }
   }
-  return <main className="admin-login"><div className="admin-login-card"><h1>Join Nest Vault</h1>
+  return <main className="admin-login"><div className="admin-login-card"><p className="label">WORKSPACE ADMIN</p><h1>Join Nest Vault</h1>
     {error && <p role="alert" className="admin-error">{error}</p>}
     {ready ? <form className="admin-form" onSubmit={finish}><label>Choose a password<input type="password" minLength={8} required value={password} onChange={e => setPassword(e.target.value)} /></label><button>Set password and continue</button></form> : <p>Checking invitation…</p>}
   </div></main>;
