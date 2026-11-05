@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition, type DragEvent } from "react";
+import { useRef, useState, useTransition, type PointerEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { Stage } from "@/lib/content";
 import { moveLeadStage } from "@/app/admin/leads/actions";
@@ -21,6 +21,8 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
   const [overStage, setOverStage] = useState<Stage | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [ghost, setGhost] = useState<{ x: number; y: number; name: string } | null>(null);
+  const pointer = useRef<{ id: string; pointerId: number; x: number; y: number; name: string; moved: boolean } | null>(null);
   const [, startTransition] = useTransition();
 
   function move(id: string, target: Stage) {
@@ -45,20 +47,42 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
     });
   }
 
-  function dragStart(event: DragEvent<HTMLElement>, id: string) {
-    if (savingId) { event.preventDefault(); return; }
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", id);
-    setDraggingId(id);
+  function stageAt(x: number, y: number): Stage | null {
+    const element = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-pipeline-stage]");
+    const stage = element?.dataset.pipelineStage;
+    return columns.some(column => column.stage === stage) ? stage as Stage : null;
+  }
+
+  function pointerDown(event: PointerEvent<HTMLElement>, lead: LeadCard) {
+    if (savingId || (event.pointerType === "mouse" && event.button !== 0)) return;
+    const target = event.target as HTMLElement;
+    if (target.closest("a, select") || (event.pointerType === "touch" && !target.closest(".admin-drag-handle"))) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pointer.current = { id: lead.id, pointerId: event.pointerId, x: event.clientX, y: event.clientY, name: lead.name, moved: false };
     setError("");
   }
 
-  function drop(event: DragEvent<HTMLElement>, target: Stage) {
-    event.preventDefault();
-    const id = event.dataTransfer.getData("text/plain");
+  function pointerMove(event: PointerEvent<HTMLElement>) {
+    const current = pointer.current;
+    if (!current || current.pointerId !== event.pointerId) return;
+    if (!current.moved && Math.hypot(event.clientX - current.x, event.clientY - current.y) < 6) return;
+    current.moved = true;
+    setDraggingId(current.id);
+    setGhost({ x: event.clientX, y: event.clientY, name: current.name });
+    setOverStage(stageAt(event.clientX, event.clientY));
+  }
+
+  function finishPointer(event: PointerEvent<HTMLElement>, cancelled = false) {
+    const current = pointer.current;
+    if (!current || current.pointerId !== event.pointerId) return;
+    const target = !cancelled && current.moved ? stageAt(event.clientX, event.clientY) : null;
+    pointer.current = null;
     setDraggingId(null);
     setOverStage(null);
-    if (id && id === draggingId) move(id, target);
+    setGhost(null);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (target) move(current.id, target);
   }
 
   return <>
@@ -67,19 +91,19 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
     <div className="admin-pipeline" aria-label="Lead pipeline">{columns.map(column => <section
       className={`admin-pipeline-column${overStage === column.stage ? " is-drop-target" : ""}`}
       key={column.stage}
-      onDragOver={event => { if (draggingId) { event.preventDefault(); event.dataTransfer.dropEffect = "move"; setOverStage(column.stage); } }}
-      onDrop={event => drop(event, column.stage)}
+      data-pipeline-stage={column.stage}
       aria-label={`${label(column.stage)}: ${column.count} leads`}
     >
       <div className="admin-pipeline-heading"><span className={`admin-status admin-status--${column.stage}`}>{label(column.stage)}</span><strong>{column.count}</strong></div>
       <div className="admin-pipeline-items">{column.leads.map(lead => <article className={`admin-pipeline-lead${draggingId === lead.id ? " is-dragging" : ""}`} key={lead.id}
-        draggable={!savingId} onDragStart={event => dragStart(event, lead.id)} onDragEnd={() => { setDraggingId(null); setOverStage(null); }}>
+        onPointerDown={event => pointerDown(event, lead)} onPointerMove={pointerMove}
+        onPointerUp={event => finishPointer(event)} onPointerCancel={event => finishPointer(event, true)}>
+        <span className="admin-drag-handle" title="Drag to another stage" aria-hidden="true">⋮⋮</span>
         <Link className="admin-pipeline-lead-link" href={`/admin/leads/${lead.id}`}>{lead.name}</Link>
         <span>{lead.interest || lead.email || lead.phone || "Offline lead"}</span>
         <small>{lead.follow_up_at ? `Follow up ${date(lead.follow_up_at)}` : lead.tour_at ? `Tour ${date(lead.tour_at)}` : `Added ${date(lead.created_at)}`}</small>
         <label className="admin-pipeline-move-label">Move to
           <select aria-label={`Move ${lead.name} to stage`} value={column.stage} disabled={!!savingId}
-            onDragStart={event => event.preventDefault()}
             onChange={event => move(lead.id, event.target.value as Stage)}>
             {columns.map(option => <option key={option.stage} value={option.stage}>{label(option.stage)}</option>)}
           </select>
@@ -87,5 +111,6 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
       </article>)}{!column.leads.length && <p className="admin-pipeline-empty">Drop a lead here</p>}</div>
       {column.count > visibleLimit && <Link className="admin-link admin-pipeline-more" href={`/admin/leads?stage=${column.stage}`}>View all {column.count} →</Link>}
     </section>)}</div>
+    {ghost && <div className="admin-drag-ghost" style={{ left: ghost.x + 14, top: ghost.y + 14 }} aria-hidden="true">{ghost.name}</div>}
   </>;
 }
