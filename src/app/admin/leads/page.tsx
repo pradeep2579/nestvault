@@ -35,7 +35,7 @@ export default async function LeadsPage({ searchParams }: Props) {
       <form className="admin-row admin-filter-bar" method="get"><input name="q" defaultValue={q} placeholder="Search name, email, phone" aria-label="Search leads" />
         <select name="stage" defaultValue={stage} aria-label="Filter stage"><option value="">All stages</option>{stages.map(s => <option key={s} value={s}>{stageName(s)}</option>)}</select>
         <button className="admin-button">Filter</button></form>
-      <div className="admin-card" style={{ padding: 0, overflow: "hidden" }}><table className="admin-table"><thead><tr><th>Name</th><th>Interest</th><th>Stage</th><th>Source</th><th>Received</th><th>Next action</th></tr></thead><tbody>
+      <div className="admin-card admin-table-scroll" style={{ padding: 0 }} role="region" aria-label="Leads table" tabIndex={0}><table className="admin-table"><thead><tr><th>Name</th><th>Interest</th><th>Stage</th><th>Source</th><th>Received</th><th>Next action</th></tr></thead><tbody>
         {leads.map(lead => <tr key={lead.id}><td><Link className="admin-link" href={`/admin/leads/${lead.id}`}>{lead.name}</Link><br /><small>{lead.email || lead.phone || "—"}</small></td>
           <td>{lead.interest || "—"}</td><td><span className={`admin-status admin-status--${lead.stage}`}>{stageName(lead.stage)}</span></td>
           <td>{lead.source === "offline" ? "Offline" : "Website"}</td><td>{new Date(lead.created_at).toLocaleDateString("en-IN")}</td>
