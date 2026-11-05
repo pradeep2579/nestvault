@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useTransition, type PointerEvent } from "react";
+import { useEffect, useRef, useState, useTransition, type PointerEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { Stage } from "@/lib/content";
 import { moveLeadStage } from "@/app/admin/leads/actions";
@@ -23,7 +23,10 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
   const [error, setError] = useState("");
   const [ghost, setGhost] = useState<{ x: number; y: number; name: string } | null>(null);
   const pointer = useRef<{ id: string; pointerId: number; x: number; y: number; name: string; moved: boolean } | null>(null);
+  const removePointerListeners = useRef<(() => void) | null>(null);
   const [, startTransition] = useTransition();
+
+  useEffect(() => () => removePointerListeners.current?.(), []);
 
   function move(id: string, target: Stage) {
     if (savingId) return;
@@ -54,16 +57,33 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
   }
 
   function pointerDown(event: PointerEvent<HTMLElement>, lead: LeadCard) {
-    if (savingId || (event.pointerType === "mouse" && event.button !== 0)) return;
+    if (savingId || pointer.current || (event.pointerType === "mouse" && event.button !== 0)) return;
     const target = event.target as HTMLElement;
     if (target.closest("a, select") || (event.pointerType === "touch" && !target.closest(".admin-drag-handle"))) return;
     event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
     pointer.current = { id: lead.id, pointerId: event.pointerId, x: event.clientX, y: event.clientY, name: lead.name, moved: false };
     setError("");
+    const onMove = (moveEvent: globalThis.PointerEvent) => pointerMove(moveEvent);
+    const onUp = (upEvent: globalThis.PointerEvent) => {
+      if (upEvent.pointerId === pointer.current?.pointerId) finishPointer(upEvent.clientX, upEvent.clientY);
+    };
+    const onMouseUp = (upEvent: MouseEvent) => finishPointer(upEvent.clientX, upEvent.clientY);
+    const onCancel = () => finishPointer(0, 0, true);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("pointercancel", onCancel);
+    window.addEventListener("blur", onCancel);
+    removePointerListeners.current = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("pointercancel", onCancel);
+      window.removeEventListener("blur", onCancel);
+    };
   }
 
-  function pointerMove(event: PointerEvent<HTMLElement>) {
+  function pointerMove(event: globalThis.PointerEvent) {
     const current = pointer.current;
     if (!current || current.pointerId !== event.pointerId) return;
     if (!current.moved && Math.hypot(event.clientX - current.x, event.clientY - current.y) < 6) return;
@@ -73,15 +93,16 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
     setOverStage(stageAt(event.clientX, event.clientY));
   }
 
-  function finishPointer(event: PointerEvent<HTMLElement>, cancelled = false) {
+  function finishPointer(x: number, y: number, cancelled = false) {
     const current = pointer.current;
-    if (!current || current.pointerId !== event.pointerId) return;
-    const target = !cancelled && current.moved ? stageAt(event.clientX, event.clientY) : null;
+    if (!current) return;
+    const target = !cancelled && current.moved ? stageAt(x, y) : null;
     pointer.current = null;
+    removePointerListeners.current?.();
+    removePointerListeners.current = null;
     setDraggingId(null);
     setOverStage(null);
     setGhost(null);
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     if (target) move(current.id, target);
   }
 
@@ -96,8 +117,7 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
     >
       <div className="admin-pipeline-heading"><span className={`admin-status admin-status--${column.stage}`}>{label(column.stage)}</span><strong>{column.count}</strong></div>
       <div className="admin-pipeline-items">{column.leads.map(lead => <article className={`admin-pipeline-lead${draggingId === lead.id ? " is-dragging" : ""}`} key={lead.id}
-        onPointerDown={event => pointerDown(event, lead)} onPointerMove={pointerMove}
-        onPointerUp={event => finishPointer(event)} onPointerCancel={event => finishPointer(event, true)}>
+        onPointerDown={event => pointerDown(event, lead)}>
         <span className="admin-drag-handle" title="Drag to another stage" aria-hidden="true">⋮⋮</span>
         <Link className="admin-pipeline-lead-link" href={`/admin/leads/${lead.id}`}>{lead.name}</Link>
         <span>{lead.interest || lead.email || lead.phone || "Offline lead"}</span>
