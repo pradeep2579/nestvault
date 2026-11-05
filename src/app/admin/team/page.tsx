@@ -12,10 +12,10 @@ export default async function Team({ searchParams }: Props) {
     <section className="admin-card"><h2>Invite a teammate</h2><form action={inviteTeamMember} className="admin-form">
       <label>Email<input name="email" type="email" required /></label><label>Role<select name="role"><option value="staff">Staff — leads and drafts</option><option value="owner">Owner — all settings and publishing</option></select></label><button>Send invitation</button>
     </form></section><section className="admin-card" style={{ marginTop: "1.5rem" }}><h2>Team members</h2>
-      <table className="admin-table"><thead><tr><th>Email</th><th>Access</th><th>Added</th></tr></thead><tbody>{(members || []).map(member => <tr key={member.id}><td>{member.email}{member.id === current.id && " (you)"}</td>
+      <div className="admin-table-scroll" role="region" aria-label="Team members table" tabIndex={0}><table className="admin-table"><thead><tr><th>Email</th><th>Access</th><th>Added</th></tr></thead><tbody>{(members || []).map(member => <tr key={member.id}><td>{member.email}{member.id === current.id && " (you)"}</td>
         <td>{member.id === current.id ? `${member.role} · active` : <form action={updateTeamMember} className="admin-row" style={{ margin: 0 }}><input type="hidden" name="id" value={member.id} />
           <select name="role" defaultValue={member.role}><option value="staff">Staff</option><option value="owner">Owner</option></select>
           <label><input type="checkbox" name="active" defaultChecked={member.active} /> Active</label><button className="admin-button">Save</button></form>}</td>
-        <td>{new Date(member.created_at).toLocaleDateString("en-IN")}</td></tr>)}</tbody></table>
+        <td>{new Date(member.created_at).toLocaleDateString("en-IN")}</td></tr>)}</tbody></table></div>
     </section></>;
 }

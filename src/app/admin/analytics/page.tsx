@@ -73,8 +73,8 @@ export default async function Analytics({ searchParams }: Props) {
       <div className="admin-card"><strong>{searchRows.reduce((sum, row) => sum + row.impressions, 0) || "—"}</strong><p>Impressions in top queries</p></div></div>
       {searchError && <p className="admin-error">Search Console: {searchError}</p>}{gaError && <p className="admin-error">GA4: {gaError}</p>}
       <div className="admin-grid" style={{ gridTemplateColumns: "1fr 1fr", marginTop: "1.5rem" }}>
-        <div className="admin-card"><h2>Top queries</h2><table className="admin-table"><thead><tr><th>Query</th><th>Clicks</th><th>Impressions</th></tr></thead><tbody>{searchRows.map((row,i) => <tr key={i}><td>{row.keys[0]}</td><td>{row.clicks}</td><td>{row.impressions}</td></tr>)}</tbody></table>{!searchRows.length && <p>No query data yet.</p>}</div>
-        <div className="admin-card"><h2>Top pages</h2><table className="admin-table"><thead><tr><th>Page</th><th>Clicks</th></tr></thead><tbody>{pageRows.map((row,i) => <tr key={i}><td style={{ overflowWrap: "anywhere" }}>{row.keys[0]}</td><td>{row.clicks}</td></tr>)}</tbody></table>{!pageRows.length && <p>No page data yet.</p>}</div>
+        <div className="admin-card"><h2>Top queries</h2><div className="admin-table-scroll" role="region" aria-label="Top search queries table" tabIndex={0}><table className="admin-table"><thead><tr><th>Query</th><th>Clicks</th><th>Impressions</th></tr></thead><tbody>{searchRows.map((row,i) => <tr key={i}><td>{row.keys[0]}</td><td>{row.clicks}</td><td>{row.impressions}</td></tr>)}</tbody></table></div>{!searchRows.length && <p>No query data yet.</p>}</div>
+        <div className="admin-card"><h2>Top pages</h2><div className="admin-table-scroll" role="region" aria-label="Top pages table" tabIndex={0}><table className="admin-table"><thead><tr><th>Page</th><th>Clicks</th></tr></thead><tbody>{pageRows.map((row,i) => <tr key={i}><td style={{ overflowWrap: "anywhere" }}>{row.keys[0]}</td><td>{row.clicks}</td></tr>)}</tbody></table></div>{!pageRows.length && <p>No page data yet.</p>}</div>
       </div>
     </section></>;
 }

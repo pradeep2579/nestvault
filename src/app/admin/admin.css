@@ -85,6 +85,8 @@ a.admin-card:hover{transform:translateY(-3px);box-shadow:0 17px 30px #05165017}
 .admin-link{color:#174087;font-weight:700;text-decoration-color:#17408759;text-underline-offset:3px}
 .admin-link:hover{color:#0b2566;text-decoration-color:currentColor}
 .admin-table{width:100%;min-width:600px;border-collapse:collapse;background:#fff;color:var(--ink);font-size:.83rem}
+.admin-table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.admin-table-scroll:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .admin-table th,.admin-table td{padding:16px 18px;text-align:left;vertical-align:middle;border-bottom:1px solid #e9eaee}
 .admin-table th{background:#f8f8f7;color:#68738d;font-size:.65rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
 .admin-table tbody tr:last-child td{border-bottom:0}
@@ -103,6 +105,7 @@ a.admin-card:hover{transform:translateY(-3px);box-shadow:0 17px 30px #05165017}
 .admin-view-switch a:hover{color:var(--navy)}
 .admin-view-switch a.is-active{background:var(--navy);color:#fff}
 .admin-pipeline{display:grid;grid-template-columns:repeat(6,minmax(195px,1fr));gap:13px;overflow-x:auto;padding:0 0 14px;scrollbar-width:thin}
+.admin-pipeline{width:100%;max-width:100%;overscroll-behavior-x:contain}
 .admin-pipeline-column{min-width:195px;padding:13px;border:1px solid var(--line);border-radius:10px;background:#fdfcf9}
 .admin-pipeline-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px}
 .admin-pipeline-heading strong{color:var(--navy);font:700 1.2rem Georgia,serif}
@@ -150,3 +153,4 @@ a.admin-card:hover{transform:translateY(-3px);box-shadow:0 17px 30px #05165017}
 @media(max-width:850px){.admin-shell{display:block}.admin-sidebar{position:static;height:auto;min-height:0;padding:16px 20px 13px}.admin-brand{padding-bottom:11px}.admin-sidebar-rule,.admin-nav-caption{display:none}.admin-nav{display:flex;overflow-x:auto;gap:5px;padding-bottom:3px;scrollbar-width:thin}.admin-nav-link{min-height:39px;flex:none;padding:8px 11px;white-space:nowrap}.admin-nav-arrow,.admin-website-link{display:none}.admin-sidebar-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:8px;padding-top:6px}.admin-account{flex:1;border:0;padding:0}.admin-sidebar-bottom form{flex:none}.admin-signout{border:1px solid #ffffff3b;padding:7px 10px}.admin-topbar{height:55px}.admin-grid,.admin-grid[style]{grid-template-columns:repeat(2,minmax(0,1fr))!important}.admin-quick-actions{align-items:flex-start;flex-direction:column}}
 @media(max-width:850px){.admin-import-card{grid-template-columns:1fr}}
 @media(max-width:580px){.admin-sidebar{padding:13px 15px 10px}.admin-brand-mark{width:38px;height:34px}.admin-brand strong{font-size:1.13rem}.admin-topbar{padding:0 18px;font-size:.58rem}.admin-topbar-role{display:none}.admin-main{padding:27px 16px 60px}.admin-main h1{font-size:2rem}.admin-grid,.admin-grid[style]{grid-template-columns:1fr!important}.admin-stat{min-height:190px}.admin-stat strong{margin-top:14px}.admin-card{padding:19px}.admin-quick-actions{padding:22px}.admin-quick-links{width:100%}.admin-quick-links .admin-button{width:100%;justify-content:space-between}.admin-row input:not([type=checkbox]),.admin-row select{max-width:100%}}
+@media(max-width:580px){.admin-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}.admin-nav-link{min-width:0;white-space:normal}.admin-sidebar-bottom{gap:8px}.admin-account-text strong{max-width:180px}.admin-section-header>.admin-row{width:100%;margin:0}.admin-section-header>.admin-row .admin-button{flex:1;min-width:0;white-space:normal;text-align:center}.admin-filter-bar input{min-width:0;width:100%;flex-basis:100%}.admin-filter-bar select,.admin-filter-bar button{flex:1}.admin-table-scroll::before{content:"Swipe to see more →";display:block;padding:8px 12px;color:var(--muted);font-size:.7rem;font-weight:700}.admin-pipeline{grid-template-columns:repeat(6,minmax(250px,1fr));touch-action:pan-x pan-y}.admin-row{min-width:0}.admin-main .admin-button,.admin-main .admin-form button{max-width:100%}}
