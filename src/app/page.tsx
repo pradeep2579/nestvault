@@ -13,6 +13,23 @@ import Location from "@/components/Location";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import BlogSection from "@/components/BlogSection";
+import { homeSeo, publicPosts } from "@/lib/public-data";
+import { absoluteUrl } from "@/lib/content";
+import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await homeSeo();
+  return { title: { absolute: seo.title }, description: seo.description,
+    alternates: { canonical: seo.canonical_url || "/" },
+    robots: { index: !seo.noindex, follow: !seo.noindex },
+    openGraph: { title: seo.title, description: seo.description, url: seo.canonical_url || "/",
+      images: seo.social_image ? [{ url: seo.social_image, alt: seo.social_image_alt || seo.title }] : [] },
+    twitter: { card: "summary_large_image", title: seo.title, description: seo.description,
+      images: seo.social_image ? [seo.social_image] : [] } };
+}
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -40,23 +57,9 @@ const jsonLd = {
       },
       geo: {
         "@type": "GeoCoordinates",
-        latitude: "17.4318",
-        longitude: "78.4072",
+        latitude: "17.4353397",
+        longitude: "78.4014406",
       },
-      openingHoursSpecification: [
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          opens: "08:00",
-          closes: "22:00",
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: ["Saturday", "Sunday"],
-          opens: "09:00",
-          closes: "20:00",
-        },
-      ],
       amenityFeature: [
         { "@type": "LocationFeatureSpecification", name: "High-Speed WiFi", value: true },
         { "@type": "LocationFeatureSpecification", name: "Meeting Rooms", value: true },
@@ -79,22 +82,8 @@ const jsonLd = {
         name: "Hyderabad",
       },
     },
-    {
-      "@type": "WebSite",
-      "@id": "https://nestvault.in/#website",
-      url: "https://nestvault.in",
-      name: "Nest Vault",
-      description: "Premium Co-working Space in Hyderabad",
-      publisher: { "@id": "https://nestvault.in/#business" },
-      potentialAction: {
-        "@type": "SearchAction",
-        target: {
-          "@type": "EntryPoint",
-          urlTemplate: "https://nestvault.in/#contact",
-        },
-        "query-input": "required name=search_term_string",
-      },
-    },
+    { "@type": "WebSite", "@id": "https://nestvault.in/#website", url: "https://nestvault.in",
+      name: "Nest Vault", publisher: { "@id": "https://nestvault.in/#business" } },
     {
       "@type": "BreadcrumbList",
       itemListElement: [
@@ -109,12 +98,15 @@ const jsonLd = {
   ],
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [posts, seo] = await Promise.all([publicPosts(3), homeSeo()]);
+  const graph = structuredClone(jsonLd);
+  Object.assign(graph["@graph"][0], seo.business_json, { url: absoluteUrl("/") });
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(graph).replace(/</g, "\\u003c") }}
       />
       <Navbar />
       <main>
@@ -128,6 +120,7 @@ export default function HomePage() {
         <Gallery />
         <SpaceTour />
         <Testimonials />
+        <BlogSection posts={posts} />
         <Location />
         <Contact />
       </main>

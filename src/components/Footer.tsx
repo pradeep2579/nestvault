@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
   const year = new Date().getFullYear();
 
   return (
@@ -100,6 +102,7 @@ export default function Footer() {
                 { label: "Gallery",    href: "#gallery"    },
                 { label: "Community",  href: "#community"  },
                 { label: "Location",   href: "#location"   },
+                { label: "Blog", href: "/blog" },
               ],
             },
             {
@@ -120,7 +123,7 @@ export default function Footer() {
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 {links.map(({ label, href }) => (
                   <li key={label}>
-                    <a href={href} className="footer-link">{label}</a>
+                    <a href={href.startsWith("#") && pathname !== "/" ? `/${href}` : href} className="footer-link">{label}</a>
                   </li>
                 ))}
               </ul>
@@ -133,11 +136,9 @@ export default function Footer() {
           <p style={{ fontFamily: "-apple-system,sans-serif", fontSize: "0.72rem", color: "rgba(255,255,255,0.18)" }}>
             © {year} Nest Vault Co-working Space. All rights reserved. · Near Madhapur Metro Station, Hyderabad.
           </p>
-          <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
-            {["Privacy Policy", "Terms of Service", "Refund Policy"].map(l => (
-              <a key={l} href="#" className="footer-link" style={{ fontSize: "0.68rem" }}>{l}</a>
-            ))}
-          </div>
+          <a href="mailto:community@nestvault.in?subject=Nest%20Vault%20policy%20information" className="footer-link" style={{ fontSize: "0.68rem" }}>
+            Request privacy, terms or refund information
+          </a>
         </div>
       </div>
 

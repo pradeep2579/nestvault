@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
   { label: "Workspaces", href: "#workspaces" },
@@ -10,10 +11,12 @@ const navLinks = [
   { label: "Pricing",    href: "#pricing"    },
   { label: "Gallery",    href: "#gallery"    },
   { label: "Location",   href: "#location"   },
+  { label: "Blog", href: "/blog" },
 ];
 
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [scrolled,      setScrolled]      = useState(false);
   const [menuOpen,      setMenuOpen]       = useState(false);
   const [activeSection, setActiveSection]  = useState("");
@@ -34,7 +37,7 @@ export default function Navbar() {
       { rootMargin: "-40% 0px -55% 0px" }
     );
     navLinks.forEach(({ href }) => {
-      const el = document.getElementById(href.slice(1));
+      const el = href.startsWith("#") ? document.getElementById(href.slice(1)) : null;
       if (el) obs.observe(el);
     });
     return () => obs.disconnect();
@@ -64,11 +67,11 @@ export default function Navbar() {
           {/* Desktop nav */}
           <div className="nv-nav__links">
             {navLinks.map(({ label, href }) => {
-              const active = activeSection === href.slice(1);
+              const active = href.startsWith("#") && activeSection === href.slice(1);
               return (
                 <a
                   key={href}
-                  href={href}
+                  href={href.startsWith("#") && pathname !== "/" ? `/${href}` : href}
                   className={`nv-nav__link ${active ? "nv-nav__link--active" : ""}`}
                 >
                   {label}
@@ -82,7 +85,7 @@ export default function Navbar() {
               </svg>
               +91 91426 96666
             </a>
-            <a href="#contact" className="btn-gold nv-nav__cta">Book a Tour</a>
+            <a href={pathname === "/" ? "#contact" : "/#contact"} className="btn-gold nv-nav__cta">Book a Tour</a>
           </div>
 
           {/* Hamburger */}
@@ -109,13 +112,13 @@ export default function Navbar() {
         {menuOpen && (
           <div className="nv-nav__drawer">
             {navLinks.map(({ label, href }) => (
-              <a key={href} href={href} className="nv-nav__drawer-link" onClick={() => setMenuOpen(false)}>
+              <a key={href} href={href.startsWith("#") && pathname !== "/" ? `/${href}` : href} className="nv-nav__drawer-link" onClick={() => setMenuOpen(false)}>
                 {label}
               </a>
             ))}
             <div className="nv-nav__drawer-footer">
               <a href="tel:+919142696666" className="nv-nav__drawer-phone">📞 +91 91426 96666</a>
-              <a href="#contact" className="btn-gold" style={{ justifyContent: "center" }} onClick={() => setMenuOpen(false)}>
+              <a href={pathname === "/" ? "#contact" : "/#contact"} className="btn-gold" style={{ justifyContent: "center" }} onClick={() => setMenuOpen(false)}>
                 Book a Free Tour
               </a>
             </div>
