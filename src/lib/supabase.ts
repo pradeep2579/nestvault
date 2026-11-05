@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 export function db() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -28,7 +29,7 @@ export async function authClient() {
 
 export type Actor = { id: string; email: string; role: "owner" | "staff" };
 
-export async function actor(): Promise<Actor | null> {
+export const actor = cache(async (): Promise<Actor | null> => {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) || !(process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)) return null;
   const client = await authClient();
   const { data: { user } } = await client.auth.getUser();
@@ -36,7 +37,7 @@ export async function actor(): Promise<Actor | null> {
   const { data } = await db().from("profiles").select("role,active").eq("id", user.id).maybeSingle();
   if (!data?.active || (data.role !== "owner" && data.role !== "staff")) return null;
   return { id: user.id, email: user.email ?? "", role: data.role };
-}
+});
 
 export async function requireActor(owner = false) {
   const current = await actor();
