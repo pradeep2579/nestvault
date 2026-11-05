@@ -28,3 +28,18 @@ export async function addNote(formData: FormData) {
   revalidatePath(`/admin/leads/${leadId}`);
   redirect(`/admin/leads/${leadId}?saved=1`);
 }
+
+export async function moveLeadStage(id: string, stage: string) {
+  await requireActor();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    || !stages.includes(stage as typeof stages[number])) throw new Error("Invalid lead or stage");
+  const client = db();
+  const { data: lead, error: readError } = await client.from("leads").select("stage").eq("id", id).maybeSingle();
+  if (readError || !lead) throw new Error("This lead could not be found. Refresh the board.");
+  if (lead.stage === stage) return;
+  const { data: updated, error } = await client.from("leads").update({ stage, updated_at: new Date().toISOString() })
+    .eq("id", id).eq("stage", lead.stage).select("id").maybeSingle();
+  if (error || !updated) throw new Error("The lead changed while you were moving it. Refresh the board.");
+  revalidatePath("/admin/leads");
+  revalidatePath(`/admin/leads/${id}`);
+}

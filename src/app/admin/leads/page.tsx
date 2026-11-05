@@ -3,6 +3,7 @@ import { db } from "@/lib/supabase";
 import { stages } from "@/lib/content";
 import { requirePageActor } from "@/lib/admin-page";
 import LeadImport from "@/components/admin/LeadImport";
+import LeadPipeline from "@/components/admin/LeadPipeline";
 
 type Props = { searchParams: Promise<{ q?: string; stage?: string; page?: string; view?: string }> };
 const stageName = (stage: string) => stage.replaceAll("_", " ");
@@ -17,7 +18,7 @@ export default async function LeadsPage({ searchParams }: Props) {
 
   const pipelineData = pipeline ? await Promise.all(stages.map(async currentStage => {
     const { data, count, error } = await client.from("leads").select("id,name,email,phone,interest,created_at,follow_up_at,tour_at", { count: "exact" })
-      .eq("stage", currentStage).order("created_at", { ascending: false }).range(0, 7);
+      .eq("stage", currentStage).order("created_at", { ascending: false }).range(0, 99);
     if (error) throw error;
     return { stage: currentStage, count: count || 0, leads: data || [] };
   })) : null;
@@ -30,14 +31,7 @@ export default async function LeadsPage({ searchParams }: Props) {
   return <><div className="admin-section-header admin-row"><div className="admin-page-heading"><p className="admin-eyebrow">RELATIONSHIPS</p><h1>Leads & tours</h1><p>Every enquiry, follow-up, and visit in one clear pipeline.</p></div>
     <div className="admin-row"><a className="admin-button" href="#import-leads">Import CSV</a><a className="admin-button admin-button-outline" href="/api/admin/leads/export">Export all leads</a></div></div>
     <nav className="admin-view-switch" aria-label="Lead views"><Link href="/admin/leads" className={!pipeline ? "is-active" : ""}>All leads</Link><Link href="/admin/leads?view=pipeline" className={pipeline ? "is-active" : ""}>Pipeline</Link></nav>
-    {pipeline ? <div className="admin-pipeline">{pipelineData?.map(column => <section className="admin-pipeline-column" key={column.stage}>
-      <div className="admin-pipeline-heading"><span className={`admin-status admin-status--${column.stage}`}>{stageName(column.stage)}</span><strong>{column.count}</strong></div>
-      <div className="admin-pipeline-items">{column.leads.map(lead => <Link href={`/admin/leads/${lead.id}`} className="admin-pipeline-lead" key={lead.id}>
-        <strong>{lead.name}</strong><span>{lead.interest || lead.email || lead.phone || "Offline lead"}</span>
-        <small>{lead.follow_up_at ? `Follow up ${new Date(lead.follow_up_at).toLocaleDateString("en-IN")}` : lead.tour_at ? `Tour ${new Date(lead.tour_at).toLocaleDateString("en-IN")}` : `Added ${new Date(lead.created_at).toLocaleDateString("en-IN")}`}</small>
-      </Link>)}{!column.leads.length && <p className="admin-pipeline-empty">No leads in this stage.</p>}</div>
-      {column.count > 8 && <Link className="admin-link admin-pipeline-more" href={`/admin/leads?stage=${column.stage}`}>View all {column.count} →</Link>}
-    </section>)}</div> : <>
+    {pipeline ? <LeadPipeline key={pipelineData?.map(column => `${column.stage}:${column.count}:${column.leads.map(lead => lead.id).join(",")}`).join("|")} initialColumns={pipelineData || []} /> : <>
       <form className="admin-row admin-filter-bar" method="get"><input name="q" defaultValue={q} placeholder="Search name, email, phone" aria-label="Search leads" />
         <select name="stage" defaultValue={stage} aria-label="Filter stage"><option value="">All stages</option>{stages.map(s => <option key={s} value={s}>{stageName(s)}</option>)}</select>
         <button className="admin-button">Filter</button></form>
