@@ -2,6 +2,12 @@
 
 Next.js 16 site with a protected CRM, blog editor, SEO settings, and Google reporting. The public site is designed for `https://nestvault.in`; the recommended deployment is Vercel with Supabase.
 
+## CRM lead import and export
+
+In `/admin/leads`, use **All leads** for the searchable, paginated list or **Pipeline** to see lead counts and recent contacts grouped by stage. Open any card to update its stage, owner, follow-up, tour time, and notes. Download **Export all leads** to save a complete CSV, including offline and website enquiries.
+
+To add offline contacts, download the CSV template, fill in one lead per row, and use **Import CSV**. Each row needs a name and either an email or phone number. Stage defaults to `new`; valid stages are `new`, `contacted`, `tour_scheduled`, `tour_completed`, `won`, and `lost`. Optional `follow_up_at` and `tour_at` values must be ISO 8601 dates with a timezone, such as `2026-11-06T10:00:00+05:30`. Imports accept up to 500 rows and 1 MB per file. The result reports added, duplicate, and rejected rows. Imported leads are marked `offline`.
+
 ## Local setup
 
 Use Node.js 22.13+ LTS or 24+, then run:
