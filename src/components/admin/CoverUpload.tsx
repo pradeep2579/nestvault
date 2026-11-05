@@ -17,7 +17,7 @@ export default function CoverUpload({ initial }: { initial: string }) {
     finally { setBusy(false); }
   }
   return <div className="admin-form"><label>Cover image URL<input name="cover_url" value={url} onChange={e => setUrl(e.target.value)} /></label>
-    <label className="admin-button" style={{ cursor: "pointer" }}>{busy ? "Uploading…" : "Upload cover image"}<input type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={e => { if (e.target.files?.[0]) void upload(e.target.files[0]); }} /></label>
+    <label className="admin-button" style={{ cursor: "pointer" }}>{busy ? "Uploading…" : "Upload cover image"}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} style={{ display: "none" }} onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void upload(file); }} /></label>
     {url && <div role="img" aria-label="Cover preview" style={{ width: 240, aspectRatio: "16/9", background: `center / cover url(${url})` }} />}
     {error && <p role="alert" className="admin-error">{error}</p>}</div>;
 }

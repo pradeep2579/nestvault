@@ -5,21 +5,24 @@ import { stages } from "@/lib/content";
 import { addNote, updateLead } from "../actions";
 import { requirePageActor } from "@/lib/admin-page";
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string }> };
 const inputDate = (value: string | null) => value ? new Date(new Date(value).getTime() + 330 * 60000).toISOString().slice(0,16) : "";
 
 export default async function LeadDetail({ params, searchParams }: Props) {
   await requirePageActor();
   const { id } = await params;
   const client = db();
-  const [{ data: lead }, { data: notes }, { data: staff }] = await Promise.all([
+  const [{ data: lead, error: leadError }, { data: notes, error: notesError }, { data: staff, error: staffError }] = await Promise.all([
     client.from("leads").select("*").eq("id", id).maybeSingle(),
     client.from("lead_notes").select("body,created_at,author_id").eq("lead_id", id).order("created_at", { ascending: false }),
     client.from("profiles").select("id,email").order("email"),
   ]);
+  if (leadError || notesError || staffError) throw new Error("Could not load lead details. Please refresh.");
   if (!lead) notFound();
+  const query = await searchParams;
   return <><div className="admin-row"><Link className="admin-link" href="/admin/leads">← Leads</Link></div><div className="admin-page-heading"><p className="admin-eyebrow">ENQUIRY DETAILS</p><h1>{lead.name}</h1><p>Review the conversation and plan the next step.</p></div>
-    {(await searchParams).saved && <p className="admin-success">Saved.</p>}
+    {query.saved && <p className="admin-success">Saved.</p>}
+    {query.error === "date" && <p className="admin-error">Enter a valid follow-up and tour time in India time.</p>}
     <div className="admin-grid" style={{ gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr)" }}>
       <section className="admin-card"><h2>Lead details</h2><p><strong>Email:</strong> {lead.email ? <a href={`mailto:${lead.email}`}>{lead.email}</a> : "—"}</p>
       <p><strong>Phone:</strong> {lead.phone ? <a href={`tel:${lead.phone}`}>{lead.phone}</a> : "—"}</p>

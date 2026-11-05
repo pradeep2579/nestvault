@@ -32,6 +32,7 @@ describe("blog content and permissions", () => {
     expect(validRedirectPath("/blog/guide")).toBe(true);
     expect(validRedirectPath("//outside.example")).toBe(false);
     expect(validRedirectPath("/admin/leads")).toBe(false);
+    expect(validRedirectPath("/login/invite")).toBe(false);
     expect(validRedirectPath("/robots.txt")).toBe(false);
     expect(redirectWouldLoop([{ source_path: "/b", destination_path: "/c" }, { source_path: "/c", destination_path: "/a" }], "/a", "/b")).toBe(true);
     expect(redirectWouldLoop([{ source_path: "/b", destination_path: "/c" }], "/a", "/b")).toBe(false);

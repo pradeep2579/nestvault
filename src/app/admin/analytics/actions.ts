@@ -15,6 +15,7 @@ export async function saveAnalyticsSettings(formData: FormData) {
 
 export async function disconnectGoogle() {
   await requireActor(true);
-  await db().from("integrations").delete().eq("name", "google");
+  const { error } = await db().from("integrations").delete().eq("name", "google");
+  if (error) throw new Error("Could not disconnect Google. Try again.");
   redirect("/admin/analytics?disconnected=1");
 }

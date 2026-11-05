@@ -9,6 +9,8 @@ export async function saveHomeSeo(formData: FormData) {
   const title = String(formData.get("title") || "").trim().slice(0, 180);
   const description = String(formData.get("description") || "").trim().slice(0, 320);
   if (!title || !description) throw new Error("Title and description are required");
+  if (["canonical_url", "social_image"].some(key => String(formData.get(key) || "").trim() && !cleanUrl(String(formData.get(key)))))
+    redirect("/admin/seo?error=url");
   let business: Record<string, unknown> = {};
   try { business = JSON.parse(String(formData.get("business_json") || "{}")); if (!business || Array.isArray(business) || typeof business !== "object") throw new Error(); }
   catch { redirect("/admin/seo?error=json"); }

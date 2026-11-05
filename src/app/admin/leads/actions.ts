@@ -9,11 +9,17 @@ export async function updateLead(formData: FormData) {
   const id = String(formData.get("id") || "");
   const stage = String(formData.get("stage") || "");
   if (!/^[0-9a-f-]{36}$/.test(id) || !stages.includes(stage as typeof stages[number])) throw new Error("Invalid lead");
-  const date = (key: string) => { const raw = String(formData.get(key) || ""); return raw ? new Date(`${raw}+05:30`).toISOString() : null; };
+  const date = (key: string) => {
+    const raw = String(formData.get(key) || "");
+    if (!raw) return null;
+    const timestamp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw) ? Date.parse(`${raw}+05:30`) : NaN;
+    if (!Number.isFinite(timestamp)) redirect(`/admin/leads/${id}?error=date`);
+    return new Date(timestamp).toISOString();
+  };
   const assigned = String(formData.get("assigned_to") || "");
-  const { error } = await db().from("leads").update({ stage, follow_up_at: date("follow_up_at"), tour_at: date("tour_at"),
-    assigned_to: assigned || null, updated_at: new Date().toISOString() }).eq("id", id);
-  if (error) throw error;
+  const { data: saved, error } = await db().from("leads").update({ stage, follow_up_at: date("follow_up_at"), tour_at: date("tour_at"),
+    assigned_to: assigned || null, updated_at: new Date().toISOString() }).eq("id", id).select("id").maybeSingle();
+  if (error || !saved) throw new Error("Could not save this lead. Refresh and try again.");
   revalidatePath("/admin/leads");
   redirect(`/admin/leads/${id}?saved=1`);
 }

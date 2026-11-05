@@ -14,16 +14,21 @@ export async function savePost(formData: FormData) {
   const coverUrl = cleanUrl(String(formData.get("cover_url") || ""));
   const coverAlt = String(formData.get("cover_alt") || "").trim().slice(0, 180);
   const intent = String(formData.get("intent") || "draft");
-  if (!title || !slug || !["draft", "publish", "schedule"].includes(intent)) throw new Error("Invalid article");
+  const editPath = id ? `/admin/blog/${id}` : "/admin/blog/new";
+  if (!title || !slug || !["draft", "publish", "schedule"].includes(intent)) redirect(`${editPath}?error=article`);
+  if (["cover_url", "canonical_url", "social_image"].some(key => String(formData.get(key) || "").trim() && !cleanUrl(String(formData.get(key)))))
+    redirect(`${editPath}?error=url`);
   if (intent !== "draft" && current.role !== "owner") throw new Error("Only owners can publish");
-  if (intent !== "draft" && coverUrl && !coverAlt) throw new Error("Cover image alt text is required to publish");
+  if (intent !== "draft" && coverUrl && !coverAlt) redirect(`${editPath}?error=alt`);
   const old = id ? (await db().from("posts").select("status,slug,published_at,author_id").eq("id", id).maybeSingle()).data : null;
   if (id && !old) throw new Error("Article not found");
   if (old && !canEditPost(current, old))
     throw new Error("Only owners can edit published articles");
   const schedule = String(formData.get("published_at") || "");
-  const publishedAt = intent === "publish" ? new Date().toISOString() : intent === "schedule" && schedule ? new Date(`${schedule}+05:30`).toISOString() : null;
-  if (intent === "schedule" && (!publishedAt || new Date(publishedAt) <= new Date())) throw new Error("Choose a future publish time in IST");
+  const scheduleTime = intent === "schedule" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(schedule)
+    ? Date.parse(`${schedule}+05:30`) : NaN;
+  if (intent === "schedule" && (!Number.isFinite(scheduleTime) || scheduleTime <= Date.now())) redirect(`${editPath}?error=schedule`);
+  const publishedAt = intent === "publish" ? new Date().toISOString() : intent === "schedule" ? new Date(scheduleTime).toISOString() : null;
   const status = intent === "publish" ? "published" : intent === "schedule" ? "scheduled" : "draft";
   const payload = { title, slug, excerpt, body_html: body, status, published_at: publishedAt,
     cover_url: coverUrl,
@@ -38,7 +43,7 @@ export async function savePost(formData: FormData) {
   const result = id ? await client.from("posts").update(payload).eq("id", id).select("id").single()
     : await client.from("posts").insert({ ...payload, author_id: current.id }).select("id").single();
   if (result.error) {
-    if (result.error.code === "23505") redirect(`/admin/blog/${id || "new"}?error=slug`);
+    if (result.error.code === "23505") redirect(`${editPath}?error=slug`);
     throw result.error;
   }
   revalidatePath("/"); revalidatePath("/blog"); revalidatePath("/sitemap.xml");

@@ -41,7 +41,7 @@ export function normalizeRedirectPath(path: string) { return path.trim().replace
 export function validRedirectPath(value: string) {
   return value.startsWith("/") && !value.startsWith("//") && !/[?#\\\x00-\x1f]/.test(value)
     && !["/robots.txt", "/sitemap.xml", "/manifest.json", "/favicon.ico", "/icon.png", "/apple-icon.png"].includes(value)
-    && !["/admin", "/api", "/_next", "/images", "/videos"].some(prefix => value === prefix || value.startsWith(`${prefix}/`));
+    && !["/admin", "/api", "/login", "/_next", "/images", "/videos"].some(prefix => value === prefix || value.startsWith(`${prefix}/`));
 }
 
 export function redirectWouldLoop(rows: { source_path: string; destination_path: string }[], source: string, destination: string) {

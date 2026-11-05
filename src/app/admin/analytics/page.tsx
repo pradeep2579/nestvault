@@ -11,7 +11,9 @@ export default async function Analytics({ searchParams }: Props) {
   await requirePageActor(true);
   const query = await searchParams;
   const days = [7,28,90].includes(Number(query.days)) ? Number(query.days) : 28;
-  const { data: connection } = await db().from("integrations").select("name,search_site,ga4_property_id").eq("name", "google").maybeSingle();
+  const oauthConfigured = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && Buffer.from(process.env.GOOGLE_TOKEN_ENCRYPTION_KEY || "", "base64").length === 32);
+  const trackingConfigured = !!process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
+  const { data: connection, error: connectionError } = await db().from("integrations").select("name,search_site,ga4_property_id").eq("name", "google").maybeSingle();
   let searchRows: GscRow[] = [], pageRows: GscRow[] = [], ga: GaRow[] = [], conversions = 0;
   let searchError = "", gaError = "";
   if (connection) {
@@ -46,9 +48,12 @@ export default async function Analytics({ searchParams }: Props) {
     {query.connected && <p className="admin-success">Google connected. Select your properties below.</p>}
     {query.saved && <p className="admin-success">Properties saved.</p>}
     {query.disconnected && <p className="admin-success">Google disconnected.</p>}
-    {query.error && <p className="admin-error">Google connection failed: {query.error}</p>}
+    {query.error && <p className="admin-error">{({ config: "Google OAuth is not configured in Vercel. Add the client ID, client secret, and token encryption key.", state: "Google sign-in expired or did not match this session. Try connecting again.", google: "Google authorization failed. Check the OAuth redirect URL and try again." } as Record<string, string>)[query.error] || "Google connection failed. Try connecting again."}</p>}
+    {connectionError && <p className="admin-error">Could not check the saved Google connection: {connectionError.message}</p>}
     <section className="admin-card"><h2>Google connection</h2>
       <p>{connection ? "Connected with read-only access to Search Console and GA4." : "Connect a Google account with access to the Nest Vault Search Console and GA4 properties."}</p>
+      {!oauthConfigured && <p className="admin-error">Google reporting setup is incomplete. Add the OAuth client ID, client secret, and token encryption key in Vercel.</p>}
+      {!trackingConfigured && <p className="admin-error">GA4 website tracking is not configured. Add the web stream measurement ID in Vercel to collect new page views and saved enquiries.</p>}
       <div className="admin-row"><a className="admin-button" href="/api/admin/google/connect">{connection ? "Reconnect Google" : "Connect Google"}</a>
       {connection && <form action={disconnectGoogle}><button className="admin-button">Disconnect</button></form>}</div>
       {connection && <form action={saveAnalyticsSettings} className="admin-form">
@@ -56,6 +61,8 @@ export default async function Analytics({ searchParams }: Props) {
         <label>GA4 property ID<input name="ga4_property_id" defaultValue={connection.ga4_property_id || ""} placeholder="Numeric property ID, not measurement ID" /></label>
         <button>Save properties</button>
       </form>}
+      {connection && !connection.search_site && <p className="admin-error">Enter the Search Console property above to show search reports.</p>}
+      {connection && !connection.ga4_property_id && <p className="admin-error">Enter the numeric GA4 property ID above to show traffic and enquiry reports.</p>}
     </section>
     <section style={{ marginTop: "1.5rem" }}><div className="admin-row"><h2>Performance</h2>{[7,28,90].map(n => <a key={n} className="admin-link" href={`/admin/analytics?days=${n}`}>{n} days</a>)}</div>
       <div className="admin-grid"><div className="admin-card"><strong>{ga[0]?.metricValues?.[0]?.value || "—"}</strong><p>Active users</p></div>

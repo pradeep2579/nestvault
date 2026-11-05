@@ -4,7 +4,8 @@ import { inviteTeamMember, updateTeamMember } from "./actions";
 type Props = { searchParams: Promise<{ sent?: string; updated?: string; error?: string }> };
 export default async function Team({ searchParams }: Props) {
   const current = await requirePageActor(true);
-  const [{ data: members }, query] = await Promise.all([db().from("profiles").select("id,email,role,active,created_at").order("created_at"), searchParams]);
+  const [{ data: members, error: membersError }, query] = await Promise.all([db().from("profiles").select("id,email,role,active,created_at").order("created_at"), searchParams]);
+  if (membersError) throw new Error("Could not load team members. Please refresh.");
   return <><div className="admin-page-heading"><p className="admin-eyebrow">PEOPLE & PERMISSIONS</p><h1>Team access</h1><p>Invite teammates and choose who can manage leads, content, and settings.</p></div>{query.sent && <p className="admin-success">Invitation sent.</p>}
     {query.updated && <p className="admin-success">Team access updated.</p>}
     {query.error && <p className="admin-error">Could not update team access ({query.error}). Check the details and try again.</p>}

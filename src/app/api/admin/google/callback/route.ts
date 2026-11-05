@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       search_site: existing?.search_site || null, ga4_property_id: existing?.ga4_property_id || null, updated_at: new Date().toISOString() });
     if (error) throw error;
     const response = NextResponse.redirect(new URL("/admin/analytics?connected=1", req.url));
-    response.cookies.delete("google_oauth_state");
+    response.cookies.set("google_oauth_state", "", { path: "/api/admin/google/callback", maxAge: 0 });
     return response;
   } catch { return NextResponse.redirect(new URL("/admin/analytics?error=google", req.url)); }
 }

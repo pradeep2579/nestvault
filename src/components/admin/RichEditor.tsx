@@ -14,11 +14,13 @@ export default function RichEditor({ initial }: { initial: string }) {
     setError("");
     const alt = window.prompt("Describe this image for accessibility and SEO", "")?.trim();
     if (!alt) { setError("Image alt text is required"); return; }
-    const body = new FormData(); body.append("file", file);
-    const response = await fetch("/api/admin/upload", { method: "POST", body });
-    const result = await response.json();
-    if (!response.ok) { setError(result.error || "Upload failed"); return; }
-    editor?.chain().focus().setImage({ src: result.url, alt }).run();
+    try {
+      const body = new FormData(); body.append("file", file);
+      const response = await fetch("/api/admin/upload", { method: "POST", body });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Upload failed");
+      editor?.chain().focus().setImage({ src: result.url, alt }).run();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Upload failed. Try again."); }
   };
   return <div><input type="hidden" name="body_html" value={html} readOnly />
     <div className="editor-toolbar">
@@ -27,6 +29,6 @@ export default function RichEditor({ initial }: { initial: string }) {
       <button type="button" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>Heading</button>
       <button type="button" onClick={() => editor?.chain().focus().toggleBulletList().run()}>List</button>
       <button type="button" onClick={() => { const href = window.prompt("Link URL", "https://"); if (href) editor?.chain().focus().setLink({ href }).run(); }}>Link</button>
-      <label className="admin-button" style={{ cursor: "pointer" }}>Insert image<input type="file" accept="image/png,image/jpeg,image/webp" style={{ display: "none" }} onChange={e => { if (e.target.files?.[0]) void upload(e.target.files[0]); }} /></label>
+      <label className="admin-button" style={{ cursor: "pointer" }}>Insert image<input type="file" accept="image/png,image/jpeg,image/webp" style={{ display: "none" }} onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void upload(file); }} /></label>
     </div><EditorContent editor={editor} className="editor-content" />{error && <p role="alert" className="admin-error">{error}</p>}</div>;
 }
