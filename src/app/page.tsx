@@ -18,7 +18,8 @@ import { homeSeo, publicPosts } from "@/lib/public-data";
 import { absoluteUrl } from "@/lib/content";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+// Cached for 5 minutes (so scheduled posts appear on time); admin saves refresh it immediately via revalidatePath.
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await homeSeo();

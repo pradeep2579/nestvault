@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 import { publicPosts, homeSeo } from "@/lib/public-data";
 import { siteUrl } from "@/lib/content";
 
-export const dynamic = "force-dynamic";
+// Cached for 5 minutes (so scheduled posts appear on time); admin saves refresh it immediately via revalidatePath.
+export const revalidate = 300;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [posts, seo] = await Promise.all([publicPosts(), homeSeo()]);

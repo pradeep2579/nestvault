@@ -6,8 +6,11 @@ import { publicPost } from "@/lib/public-data";
 import { absoluteUrl } from "@/lib/content";
 import Link from "next/link";
 
-export const dynamic = "force-dynamic";
+// Cached for 5 minutes (so scheduled posts appear on time); admin saves refresh it immediately via revalidatePath.
+export const revalidate = 300;
 type Props = { params: Promise<{ slug: string }> };
+// No posts are built ahead of time; each one is rendered on its first visit and then cached.
+export async function generateStaticParams() { return []; }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await publicPost((await params).slug);
