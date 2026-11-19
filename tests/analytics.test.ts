@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCount, googleErrorMessage, normalizeSearchSite, parseTokenKey, reportWindow } from "../src/lib/analytics";
+import { chartPath, dailySeries, formatCount, googleErrorMessage, normalizeSearchSite, parseTokenKey, percent, reportWindow, shares, windowDates } from "../src/lib/analytics";
 
 describe("analytics report window", () => {
   it("covers exactly the chosen number of days, ending 3 days ago in India time", () => {
@@ -66,5 +66,26 @@ describe("Search Console property", () => {
     expect(normalizeSearchSite("  ")).toBe("");
     expect(normalizeSearchSite("not a site")).toBeNull();
     expect(normalizeSearchSite("https://")).toBeNull();
+  });
+});
+
+describe("analytics charts", () => {
+  it("lists every day in the window and fills missing days with 0", () => {
+    const dates = windowDates("2026-10-30", "2026-11-02");
+    expect(dates).toEqual(["2026-10-30", "2026-10-31", "2026-11-01", "2026-11-02"]);
+    expect(dailySeries(dates, [{ date: "20261031", value: 4 }, { date: "2026-11-02", value: 2 }]).map(point => point.value)).toEqual([0, 4, 0, 2]);
+  });
+  it("scales the line so the biggest day reaches the top", () => {
+    const { points } = chartPath([0, 5, 10], 200, 100, 0);
+    expect(points).toEqual([{ x: 0, y: 100 }, { x: 100, y: 50 }, { x: 200, y: 0 }]);
+  });
+  it("draws a flat line at the bottom when every day is 0", () => {
+    expect(chartPath([0, 0], 100, 50, 0).points.every(point => point.y === 50)).toBe(true);
+  });
+  it("splits values into shares that add up to 1", () => {
+    expect(shares([3, 1])).toEqual([{ share: 0.75, start: 0 }, { share: 0.25, start: 0.75 }]);
+    expect(shares([0, 0])[0].share).toBe(0);
+    expect(percent(1, 4)).toBe("25.0%");
+    expect(percent(1, 0)).toBe("—");
   });
 });

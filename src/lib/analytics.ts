@@ -49,3 +49,48 @@ export function normalizeSearchSite(raw: string) {
     return url.hostname.includes(".") ? `${url.protocol}//${url.host}${url.pathname.endsWith("/") ? url.pathname : `${url.pathname}/`}` : null;
   } catch { return null; }
 }
+
+// Every date in the report window, as YYYY-MM-DD, so charts show days with no visits as 0.
+export function windowDates(startDate: string, endDate: string) {
+  const dates: string[] = [];
+  for (let time = Date.parse(`${startDate}T00:00:00Z`); time <= Date.parse(`${endDate}T00:00:00Z`); time += day) dates.push(new Date(time).toISOString().slice(0, 10));
+  return dates;
+}
+
+// Lines up report rows (GA4 dates look like 20261020, Search Console like 2026-10-20) with the window's dates.
+export function dailySeries(dates: string[], rows: { date: string; value: number }[]) {
+  const values = new Map<string, number>();
+  for (const row of rows) {
+    const date = row.date.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
+    values.set(date, (values.get(date) || 0) + row.value);
+  }
+  return dates.map(date => ({ date, value: values.get(date) || 0 }));
+}
+
+// SVG path data for a line and the area under it, scaled so the largest value touches the top.
+export function chartPath(values: number[], width: number, height: number, pad = 6) {
+  const max = Math.max(1, ...values);
+  const points = values.map((value, index) => ({
+    x: values.length > 1 ? (index * width) / (values.length - 1) : width / 2,
+    y: pad + (height - 2 * pad) * (1 - value / max),
+  }));
+  const line = points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
+  const area = points.length ? `${line} L${points[points.length - 1].x.toFixed(1)} ${height} L${points[0].x.toFixed(1)} ${height} Z` : "";
+  return { line, area, points, max };
+}
+
+// Share of the total for each value, plus where each slice starts, for donut and stacked-bar charts.
+export function shares(values: number[]) {
+  const total = values.reduce((sum, value) => sum + value, 0);
+  let start = 0;
+  return values.map(value => {
+    const share = total ? value / total : 0;
+    const slice = { share, start };
+    start += share;
+    return slice;
+  });
+}
+
+export function percent(part: number, whole: number, digits = 1) {
+  return whole > 0 ? `${((part / whole) * 100).toFixed(digits)}%` : "—";
+}
