@@ -2,14 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/supabase";
 import { stages } from "@/lib/content";
-import { addNote, updateLead } from "../actions";
+import { addNote, updateLead, updateLeadDetails } from "../actions";
+import DeleteLeadButton from "@/components/admin/DeleteLeadButton";
 import { requirePageActor } from "@/lib/admin-page";
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; detail?: string }> };
+const interests = ["Hot Desk (Day Pass)", "Dedicated Desk", "Private Cabin", "Meeting Room", "Virtual Office", "Event Space", "Just exploring"];
 const inputDate = (value: string | null) => value ? new Date(new Date(value).getTime() + 330 * 60000).toISOString().slice(0,16) : "";
 
 export default async function LeadDetail({ params, searchParams }: Props) {
-  await requirePageActor();
+  const current = await requirePageActor();
   const { id } = await params;
   const client = db();
   const [{ data: lead, error: leadError }, { data: notes, error: notesError }, { data: staff, error: staffError }] = await Promise.all([
@@ -22,6 +24,7 @@ export default async function LeadDetail({ params, searchParams }: Props) {
   const query = await searchParams;
   return <><div className="admin-row"><Link className="admin-link" href="/admin/leads">← Leads</Link></div><div className="admin-page-heading"><p className="admin-eyebrow">ENQUIRY DETAILS</p><h1>{lead.name}</h1><p>Review the conversation and plan the next step.</p></div>
     {query.saved && <p className="admin-success">Saved.</p>}
+    {query.error === "details" && <p className="admin-error" role="alert">{query.detail || "Check the details and try again."}</p>}
     {query.error === "date" && <p className="admin-error">Enter a valid follow-up and tour time in India time.</p>}
     <div className="admin-grid" style={{ gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr)" }}>
       <section className="admin-card"><h2>Lead details</h2><p><strong>Email:</strong> {lead.email ? <a href={`mailto:${lead.email}`}>{lead.email}</a> : "—"}</p>
@@ -29,7 +32,20 @@ export default async function LeadDetail({ params, searchParams }: Props) {
       <p><strong>Company:</strong> {lead.company || "—"}</p><p><strong>Interest:</strong> {lead.interest || "—"}</p>
       <p><strong>Team size:</strong> {lead.team_size || "—"}</p><p><strong>Message:</strong> {lead.message || "—"}</p>
       <p><strong>Source:</strong> {lead.source === "offline" ? "Offline import" : "Website"}</p>
-      <p><strong>Received:</strong> {new Date(lead.created_at).toLocaleString("en-IN")}</p></section>
+      <p><strong>Received:</strong> {new Date(lead.created_at).toLocaleString("en-IN")}</p>
+      <details className="admin-edit-details" open={query.error === "details"}><summary className="admin-link">Edit details</summary>
+        <form action={updateLeadDetails} className="admin-form"><input type="hidden" name="id" value={id} />
+          <label>Name<input name="name" defaultValue={lead.name} required maxLength={120} /></label>
+          <label>Email<input name="email" type="email" defaultValue={lead.email || ""} maxLength={254} /></label>
+          <label>Phone<input name="phone" type="tel" defaultValue={lead.phone || ""} maxLength={50} /></label>
+          <label>Company<input name="company" defaultValue={lead.company || ""} maxLength={120} /></label>
+          <label>Interest<select name="interest" defaultValue={lead.interest || ""}><option value="">Not specified</option>
+            {lead.interest && !interests.includes(lead.interest) && <option value={lead.interest}>{lead.interest}</option>}
+            {interests.map(item => <option key={item} value={item}>{item}</option>)}</select></label>
+          <label>Team size<input name="team_size" defaultValue={lead.team_size || ""} maxLength={50} /></label>
+          <label>Message<textarea name="message" defaultValue={lead.message || ""} rows={3} maxLength={2000} /></label>
+          <button>Save details</button></form></details>
+      {current.role === "owner" && <DeleteLeadButton id={id} name={lead.name} />}</section>
       <section className="admin-card"><h2>Pipeline & tour</h2><form action={updateLead} className="admin-form">
         <input type="hidden" name="id" value={id} />
         <label>Stage<select name="stage" defaultValue={lead.stage}>{stages.map(s => <option key={s} value={s}>{s.replaceAll("_", " ")}</option>)}</select></label>

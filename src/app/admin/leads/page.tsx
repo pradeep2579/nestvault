@@ -6,12 +6,12 @@ import LeadImport from "@/components/admin/LeadImport";
 import LeadManualForm from "@/components/admin/LeadManualForm";
 import LeadPipeline from "@/components/admin/LeadPipeline";
 
-type Props = { searchParams: Promise<{ q?: string; stage?: string; page?: string; view?: string }> };
+type Props = { searchParams: Promise<{ q?: string; stage?: string; page?: string; view?: string; deleted?: string }> };
 const stageName = (stage: string) => stage.replaceAll("_", " ");
 
 export default async function LeadsPage({ searchParams }: Props) {
   await requirePageActor();
-  const { q = "", stage = "", page = "1", view = "list" } = await searchParams;
+  const { q = "", stage = "", page = "1", view = "list", deleted } = await searchParams;
   const pipeline = view === "pipeline";
   const currentPage = Math.max(1, Number.parseInt(page, 10) || 1);
   const client = db();
@@ -31,6 +31,7 @@ export default async function LeadsPage({ searchParams }: Props) {
 
   return <><div className="admin-section-header admin-row"><div className="admin-page-heading"><p className="admin-eyebrow">RELATIONSHIPS</p><h1>Leads & tours</h1><p>Every enquiry, follow-up, and visit in one clear pipeline.</p></div>
     <div className="admin-row"><a className="admin-button" href="#add-lead">Add lead</a><a className="admin-button admin-button-outline" href="#import-leads">Import CSV</a><a className="admin-button admin-button-outline" href="/api/admin/leads/export">Export all leads</a></div></div>
+    {deleted && <p className="admin-success" role="status">Lead deleted.</p>}
     <nav className="admin-view-switch" aria-label="Lead views"><Link href="/admin/leads" className={!pipeline ? "is-active" : ""}>All leads</Link><Link href="/admin/leads?view=pipeline" className={pipeline ? "is-active" : ""}>Pipeline</Link></nav>
     {pipeline ? <LeadPipeline key={pipelineData?.map(column => `${column.stage}:${column.count}:${column.leads.map(lead => lead.id).join(",")}`).join("|")} initialColumns={pipelineData || []} /> : <>
       <form className="admin-row admin-filter-bar" method="get"><input name="q" defaultValue={q} placeholder="Search name, email, phone" aria-label="Search leads" />
