@@ -7,7 +7,10 @@ export async function proxy(request: NextRequest) {
   const anon = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const service = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   let response = NextResponse.next({ request });
-  if (url && anon) {
+  const path = request.nextUrl.pathname.replace(/\/$/, "") || "/";
+  // Only signed-in areas need the session refreshed. Public pages skip this Supabase call.
+  const needsSession = path.startsWith("/admin") || path.startsWith("/login") || path.startsWith("/api/admin");
+  if (url && anon && needsSession) {
     const auth = createServerClient(url, anon, { cookies: {
       getAll() { return request.cookies.getAll(); },
       setAll(items) {
@@ -16,10 +19,9 @@ export async function proxy(request: NextRequest) {
         items.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
       },
     } });
-    await auth.auth.getUser();
+    await auth.auth.getClaims();
   }
   if (!url || !service) return response;
-  const path = request.nextUrl.pathname.replace(/\/$/, "") || "/";
   if (path.startsWith("/api/") || path.startsWith("/admin") || path.startsWith("/login")) return response;
   const client = createClient(url, service, { auth: { persistSession: false } });
   const { data } = await client.from("redirects").select("destination_path,permanent").eq("source_path", path).maybeSingle();
