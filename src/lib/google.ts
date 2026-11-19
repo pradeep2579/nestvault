@@ -1,6 +1,7 @@
 import "server-only";
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 import { db } from "@/lib/supabase";
+import { googleErrorMessage, parseTokenKey } from "@/lib/analytics";
 
 const scopes = "https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/analytics.readonly";
 const redirectUri = () => new URL("/api/admin/google/callback", process.env.NEXT_PUBLIC_SITE_URL || "https://nestvault.in").toString();
@@ -12,13 +13,13 @@ export function googleConfigProblems() {
   if (!process.env.GOOGLE_CLIENT_SECRET) problems.push("GOOGLE_CLIENT_SECRET is missing");
   const key = process.env.GOOGLE_TOKEN_ENCRYPTION_KEY;
   if (!key) problems.push("GOOGLE_TOKEN_ENCRYPTION_KEY is missing");
-  else if (Buffer.from(key, "base64").length !== 32) problems.push("GOOGLE_TOKEN_ENCRYPTION_KEY is not a 32-byte base64 value (create one with: openssl rand -base64 32)");
+  else if (!parseTokenKey(key)) problems.push("GOOGLE_TOKEN_ENCRYPTION_KEY is not a valid 32-byte key. Create one with: openssl rand -base64 32");
   return problems;
 }
 
 function encryptionKey() {
-  const key = Buffer.from(process.env.GOOGLE_TOKEN_ENCRYPTION_KEY || "", "base64");
-  if (key.length !== 32) throw new Error("Google token encryption key must be 32 bytes, base64 encoded");
+  const key = parseTokenKey(process.env.GOOGLE_TOKEN_ENCRYPTION_KEY);
+  if (!key) throw new Error("Google token encryption key must be 32 bytes, base64 or hex encoded");
   return key;
 }
 
@@ -67,6 +68,6 @@ export async function googleToken() {
 export async function googlePost(url: string, token: string, body: object) {
   const response = await fetch(url, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body), cache: "no-store" });
-  if (!response.ok) throw new Error(`Google reporting request failed (${response.status})`);
+  if (!response.ok) throw new Error(googleErrorMessage(response.status, await response.json().catch(() => null)));
   return response.json();
 }

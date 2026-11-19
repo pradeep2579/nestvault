@@ -1,6 +1,7 @@
 import { db } from "@/lib/supabase";
 import { requirePageActor } from "@/lib/admin-page";
 import { googleToken, googlePost, googleConfigProblems } from "@/lib/google";
+import { formatCount, reportWindow } from "@/lib/analytics";
 import { disconnectGoogle, saveAnalyticsSettings } from "./actions";
 
 type Props = { searchParams: Promise<{ days?: string; error?: string; saved?: string; connected?: string; disconnected?: string }> };
@@ -17,11 +18,10 @@ export default async function Analytics({ searchParams }: Props) {
   const { data: connection, error: connectionError } = await db().from("integrations").select("name,search_site,ga4_property_id").eq("name", "google").maybeSingle();
   let searchRows: GscRow[] = [], pageRows: GscRow[] = [], ga: GaRow[] = [], conversions = 0;
   let searchError = "", gaError = "";
+  const { startDate, endDate } = reportWindow(days);
   if (connection) {
     try {
       const { token } = await googleToken();
-      const endDate = new Date(Date.now() - 3 * 86400000).toISOString().slice(0,10);
-      const startDate = new Date(Date.now() - (days + 3) * 86400000).toISOString().slice(0,10);
       if (connection.search_site) {
         const base = `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(connection.search_site)}/searchAnalytics/query`;
         try {
@@ -36,8 +36,8 @@ export default async function Analytics({ searchParams }: Props) {
         try {
           const base = `https://analyticsdata.googleapis.com/v1beta/properties/${connection.ga4_property_id}:runReport`;
           const [overview, leads] = await Promise.all([
-            googlePost(base, token, { dateRanges: [{ startDate: `${days}daysAgo`, endDate: "yesterday" }], metrics: [{ name: "activeUsers" }, { name: "sessions" }, { name: "screenPageViews" }] }),
-            googlePost(base, token, { dateRanges: [{ startDate: `${days}daysAgo`, endDate: "yesterday" }], metrics: [{ name: "eventCount" }],
+            googlePost(base, token, { dateRanges: [{ startDate, endDate }], metrics: [{ name: "activeUsers" }, { name: "sessions" }, { name: "screenPageViews" }] }),
+            googlePost(base, token, { dateRanges: [{ startDate, endDate }], metrics: [{ name: "eventCount" }],
               dimensionFilter: { filter: { fieldName: "eventName", stringFilter: { value: "generate_lead" } } } }),
           ]);
           ga = overview.rows || []; conversions = Number(leads.rows?.[0]?.metricValues?.[0]?.value || 0);
@@ -45,6 +45,11 @@ export default async function Analytics({ searchParams }: Props) {
       }
     } catch (error) { searchError = gaError = error instanceof Error ? error.message : "Google connection failed"; }
   }
+  // A report that loaded with no rows means 0; a missing or failed report shows a dash.
+  const gaLoaded = !!connection?.ga4_property_id && !gaError;
+  const searchLoaded = !!connection?.search_site && !searchError;
+  const gaMetric = (index: number) => gaLoaded ? ga[0]?.metricValues?.[index]?.value ?? 0 : null;
+  const searchTotal = (field: "clicks" | "impressions") => searchLoaded ? searchRows.reduce((sum, row) => sum + row[field], 0) : null;
   return <><div className="admin-page-heading"><p className="admin-eyebrow">PERFORMANCE</p><h1>Analytics</h1><p>Understand search visibility, traffic, and saved enquiries.</p></div>
     {query.connected && <p className="admin-success">Google connected. Select your properties below.</p>}
     {query.saved && <p className="admin-success">Properties saved.</p>}
@@ -67,16 +72,17 @@ export default async function Analytics({ searchParams }: Props) {
       {connection && !connection.ga4_property_id && <p className="admin-error">Enter the numeric GA4 property ID above to show traffic and enquiry reports.</p>}
     </section>
     <section style={{ marginTop: "1.5rem" }}><div className="admin-row"><h2>Performance</h2>{[7,28,90].map(n => <a key={n} className="admin-link" href={`/admin/analytics?days=${n}`}>{n} days</a>)}</div>
-      <div className="admin-grid"><div className="admin-card"><strong>{ga[0]?.metricValues?.[0]?.value || "—"}</strong><p>Active users</p></div>
-      <div className="admin-card"><strong>{ga[0]?.metricValues?.[1]?.value || "—"}</strong><p>Sessions</p></div>
-      <div className="admin-card"><strong>{ga[0]?.metricValues?.[2]?.value || "—"}</strong><p>Page views</p></div>
-      <div className="admin-card"><strong>{connection?.ga4_property_id ? conversions : "—"}</strong><p>Saved enquiries (GA4 event)</p></div>
-      <div className="admin-card"><strong>{searchRows.reduce((sum, row) => sum + row.clicks, 0) || "—"}</strong><p>Clicks in top queries</p></div>
-      <div className="admin-card"><strong>{searchRows.reduce((sum, row) => sum + row.impressions, 0) || "—"}</strong><p>Impressions in top queries</p></div></div>
+      <p>{days} days, {startDate} to {endDate}. Search Console data takes about 3 days to arrive, so both reports end on the same date.</p>
+      <div className="admin-grid"><div className="admin-card"><strong>{formatCount(gaMetric(0))}</strong><p>Active users</p></div>
+      <div className="admin-card"><strong>{formatCount(gaMetric(1))}</strong><p>Sessions</p></div>
+      <div className="admin-card"><strong>{formatCount(gaMetric(2))}</strong><p>Page views</p></div>
+      <div className="admin-card"><strong>{formatCount(gaLoaded ? conversions : null)}</strong><p>Saved enquiries (GA4 event)</p></div>
+      <div className="admin-card"><strong>{formatCount(searchTotal("clicks"))}</strong><p>Clicks in top queries</p></div>
+      <div className="admin-card"><strong>{formatCount(searchTotal("impressions"))}</strong><p>Impressions in top queries</p></div></div>
       {searchError && <p className="admin-error">Search Console: {searchError}</p>}{gaError && <p className="admin-error">GA4: {gaError}</p>}
       <div className="admin-grid" style={{ gridTemplateColumns: "1fr 1fr", marginTop: "1.5rem" }}>
-        <div className="admin-card"><h2>Top queries</h2><div className="admin-table-scroll" role="region" aria-label="Top search queries table" tabIndex={0}><table className="admin-table"><thead><tr><th>Query</th><th>Clicks</th><th>Impressions</th></tr></thead><tbody>{searchRows.map((row,i) => <tr key={i}><td>{row.keys[0]}</td><td>{row.clicks}</td><td>{row.impressions}</td></tr>)}</tbody></table></div>{!searchRows.length && <p>No query data yet.</p>}</div>
-        <div className="admin-card"><h2>Top pages</h2><div className="admin-table-scroll" role="region" aria-label="Top pages table" tabIndex={0}><table className="admin-table"><thead><tr><th>Page</th><th>Clicks</th></tr></thead><tbody>{pageRows.map((row,i) => <tr key={i}><td style={{ overflowWrap: "anywhere" }}>{row.keys[0]}</td><td>{row.clicks}</td></tr>)}</tbody></table></div>{!pageRows.length && <p>No page data yet.</p>}</div>
+        <div className="admin-card"><h2>Top queries</h2><div className="admin-table-scroll" role="region" aria-label="Top search queries table" tabIndex={0}><table className="admin-table"><thead><tr><th>Query</th><th>Clicks</th><th>Impressions</th></tr></thead><tbody>{searchRows.map((row,i) => <tr key={i}><td>{row.keys[0]}</td><td>{formatCount(row.clicks)}</td><td>{formatCount(row.impressions)}</td></tr>)}</tbody></table></div>{!searchRows.length && <p>No query data yet.</p>}</div>
+        <div className="admin-card"><h2>Top pages</h2><div className="admin-table-scroll" role="region" aria-label="Top pages table" tabIndex={0}><table className="admin-table"><thead><tr><th>Page</th><th>Clicks</th></tr></thead><tbody>{pageRows.map((row,i) => <tr key={i}><td style={{ overflowWrap: "anywhere" }}>{row.keys[0]}</td><td>{formatCount(row.clicks)}</td></tr>)}</tbody></table></div>{!pageRows.length && <p>No page data yet.</p>}</div>
       </div>
     </section></>;
 }
