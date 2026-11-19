@@ -3,6 +3,7 @@ import { db } from "@/lib/supabase";
 import { stages } from "@/lib/content";
 import { requirePageActor } from "@/lib/admin-page";
 import LeadImport from "@/components/admin/LeadImport";
+import LeadManualForm from "@/components/admin/LeadManualForm";
 import LeadPipeline from "@/components/admin/LeadPipeline";
 
 type Props = { searchParams: Promise<{ q?: string; stage?: string; page?: string; view?: string }> };
@@ -29,7 +30,7 @@ export default async function LeadsPage({ searchParams }: Props) {
   const pageUrl = (n: number) => `/admin/leads?${new URLSearchParams({ q, stage, page: String(n) })}`;
 
   return <><div className="admin-section-header admin-row"><div className="admin-page-heading"><p className="admin-eyebrow">RELATIONSHIPS</p><h1>Leads & tours</h1><p>Every enquiry, follow-up, and visit in one clear pipeline.</p></div>
-    <div className="admin-row"><a className="admin-button" href="#import-leads">Import CSV</a><a className="admin-button admin-button-outline" href="/api/admin/leads/export">Export all leads</a></div></div>
+    <div className="admin-row"><a className="admin-button" href="#add-lead">Add lead</a><a className="admin-button admin-button-outline" href="#import-leads">Import CSV</a><a className="admin-button admin-button-outline" href="/api/admin/leads/export">Export all leads</a></div></div>
     <nav className="admin-view-switch" aria-label="Lead views"><Link href="/admin/leads" className={!pipeline ? "is-active" : ""}>All leads</Link><Link href="/admin/leads?view=pipeline" className={pipeline ? "is-active" : ""}>Pipeline</Link></nav>
     {pipeline ? <LeadPipeline key={pipelineData?.map(column => `${column.stage}:${column.count}:${column.leads.map(lead => lead.id).join(",")}`).join("|")} initialColumns={pipelineData || []} /> : <>
       <form className="admin-row admin-filter-bar" method="get"><input name="q" defaultValue={q} placeholder="Search name, email, phone" aria-label="Search leads" />
@@ -45,7 +46,7 @@ export default async function LeadsPage({ searchParams }: Props) {
         {currentPage > 1 && <Link className="admin-link" href={pageUrl(currentPage - 1)}>Previous</Link>}
         {currentPage * 50 < count && <Link className="admin-link" href={pageUrl(currentPage + 1)}>Next</Link>}</div>
     </>}
-    <LeadImport />
+    <div className="admin-lead-tools"><LeadManualForm /><LeadImport /></div>
   </>;
 }
 
