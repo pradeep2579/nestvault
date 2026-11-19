@@ -23,12 +23,23 @@ export async function proxy(request: NextRequest) {
   }
   if (!url || !service) return response;
   if (path.startsWith("/api/") || path.startsWith("/admin") || path.startsWith("/login")) return response;
-  const client = createClient(url, service, { auth: { persistSession: false } });
-  const { data } = await client.from("redirects").select("destination_path,permanent").eq("source_path", path).maybeSingle();
+  const data = (await redirectTable(url, service)).get(path);
   if (!data) return response;
   const redirected = NextResponse.redirect(new URL(data.destination_path, request.url), data.permanent ? 301 : 302);
   response.cookies.getAll().forEach(cookie => redirected.cookies.set(cookie));
   return redirected;
+}
+
+// The redirects table is small and rarely changes, so keep it in memory for a minute instead of
+// querying the database on every page view. New or deleted redirects take effect within a minute.
+let redirectCache: { at: number; rows: Map<string, { destination_path: string; permanent: boolean }> } | null = null;
+async function redirectTable(url: string, service: string) {
+  if (redirectCache && Date.now() - redirectCache.at < 60_000) return redirectCache.rows;
+  const client = createClient(url, service, { auth: { persistSession: false } });
+  const { data, error } = await client.from("redirects").select("source_path,destination_path,permanent");
+  if (error) return redirectCache?.rows || new Map();
+  redirectCache = { at: Date.now(), rows: new Map((data || []).map(row => [row.source_path, row])) };
+  return redirectCache.rows;
 }
 
 export const config = { matcher: "/((?!_next/|favicon.ico|icon.png|apple-icon.png|images/|videos/|manifest.json|robots.txt|sitemap.xml).*)" };
