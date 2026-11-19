@@ -2,6 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/supabase";
 import { stages } from "@/lib/content";
 import { requirePageActor } from "@/lib/admin-page";
+import { phoneSearchPattern } from "@/lib/lead-search";
+import { istDate, istDateTime } from "@/lib/format";
 import LeadImport from "@/components/admin/LeadImport";
 import LeadManualForm from "@/components/admin/LeadManualForm";
 import LeadPipeline from "@/components/admin/LeadPipeline";
@@ -40,8 +42,8 @@ export default async function LeadsPage({ searchParams }: Props) {
       <div className="admin-card admin-table-scroll" style={{ padding: 0 }} role="region" aria-label="Leads table" tabIndex={0}><table className="admin-table"><thead><tr><th>Name</th><th>Interest</th><th>Stage</th><th>Source</th><th>Received</th><th>Next action</th></tr></thead><tbody>
         {leads.map(lead => <tr key={lead.id}><td><Link className="admin-link" href={`/admin/leads/${lead.id}`}>{lead.name}</Link><br /><small>{lead.email || lead.phone || "—"}</small></td>
           <td>{lead.interest || "—"}</td><td><span className={`admin-status admin-status--${lead.stage}`}>{stageName(lead.stage)}</span></td>
-          <td>{lead.source === "offline" ? "Offline" : "Website"}</td><td>{new Date(lead.created_at).toLocaleDateString("en-IN")}</td>
-          <td>{lead.follow_up_at ? `Follow up ${new Date(lead.follow_up_at).toLocaleString("en-IN")}` : lead.tour_at ? `Tour ${new Date(lead.tour_at).toLocaleString("en-IN")}` : "—"}</td></tr>)}
+          <td>{lead.source === "offline" ? "Offline" : "Website"}</td><td>{istDate(lead.created_at)}</td>
+          <td>{lead.follow_up_at ? `Follow up ${istDateTime(lead.follow_up_at)}` : lead.tour_at ? `Tour ${istDateTime(lead.tour_at)}` : "—"}</td></tr>)}
       </tbody></table>{!leads.length && <p style={{ padding: "1rem" }}>No matching leads.</p>}</div>
       <div className="admin-row" style={{ marginTop: "1rem" }}><span>{count} matching leads</span>
         {currentPage > 1 && <Link className="admin-link" href={pageUrl(currentPage - 1)}>Previous</Link>}
@@ -55,7 +57,12 @@ async function loadLeads(client: ReturnType<typeof db>, needle: string, stage: s
   let query = client.from("leads").select("id,name,email,phone,interest,stage,source,created_at,follow_up_at,tour_at", { count: "exact" })
     .order("created_at", { ascending: false });
   if (stages.includes(stage as typeof stages[number])) query = query.eq("stage", stage);
-  if (needle) query = query.or(["name", "email", "phone", "interest"].map(field => `${field}.ilike.%${needle}%`).join(","));
+  if (needle) {
+    const filters = ["name", "email", "phone", "interest"].map(field => `${field}.ilike.%${needle}%`);
+    const phone = phoneSearchPattern(needle);
+    if (phone) filters.push(`phone.ilike.${phone}`);
+    query = query.or(filters.join(","));
+  }
   const { data, error, count } = await query.range((currentPage - 1) * 50, currentPage * 50 - 1);
   if (error) throw error;
   return { leads: data || [], count: count || 0 };

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { istDateTime } from "@/lib/format";
 import { db } from "@/lib/supabase";
 import { stages } from "@/lib/content";
 import { addNote, updateLead, updateLeadDetails } from "../actions";
@@ -32,7 +33,7 @@ export default async function LeadDetail({ params, searchParams }: Props) {
       <p><strong>Company:</strong> {lead.company || "—"}</p><p><strong>Interest:</strong> {lead.interest || "—"}</p>
       <p><strong>Team size:</strong> {lead.team_size || "—"}</p><p><strong>Message:</strong> {lead.message || "—"}</p>
       <p><strong>Source:</strong> {lead.source === "offline" ? "Offline import" : "Website"}</p>
-      <p><strong>Received:</strong> {new Date(lead.created_at).toLocaleString("en-IN")}</p>
+      <p><strong>Received:</strong> {istDateTime(lead.created_at)}</p>
       <details className="admin-edit-details" open={query.error === "details"}><summary className="admin-link">Edit details</summary>
         <form action={updateLeadDetails} className="admin-form"><input type="hidden" name="id" value={id} />
           <label>Name<input name="name" defaultValue={lead.name} required maxLength={120} /></label>
@@ -55,6 +56,6 @@ export default async function LeadDetail({ params, searchParams }: Props) {
       </form></section>
     </div><section className="admin-card" style={{ marginTop: "1.5rem" }}><h2>Notes</h2>
       <form action={addNote} className="admin-form"><input type="hidden" name="lead_id" value={id} /><label>Add note<textarea name="body" required maxLength={2000} /></label><button>Add note</button></form>
-      {(notes || []).map((note, i) => <div key={i} style={{ borderTop: "1px solid #e4e9f0", marginTop: "1rem", paddingTop: "1rem" }}><p>{note.body}</p><small>{new Date(note.created_at).toLocaleString("en-IN")}</small></div>)}
+      {(notes || []).map((note, i) => <div key={i} style={{ borderTop: "1px solid #e4e9f0", marginTop: "1rem", paddingTop: "1rem" }}><p>{note.body}</p><small>{istDateTime(note.created_at)}</small></div>)}
     </section></>;
 }
