@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCount, googleErrorMessage, parseTokenKey, reportWindow } from "../src/lib/analytics";
+import { formatCount, googleErrorMessage, normalizeSearchSite, parseTokenKey, reportWindow } from "../src/lib/analytics";
 
 describe("analytics report window", () => {
   it("covers exactly the chosen number of days, ending 3 days ago in India time", () => {
@@ -49,5 +49,22 @@ describe("Google token key", () => {
     expect(parseTokenKey(undefined)).toBeNull();
     expect(parseTokenKey(Buffer.alloc(16).toString("base64"))).toBeNull();
     expect(parseTokenKey("my secret passphrase")).toBeNull();
+  });
+});
+
+describe("Search Console property", () => {
+  it("turns a plain domain into a domain property", () => {
+    expect(normalizeSearchSite("nestvault.in")).toBe("sc-domain:nestvault.in");
+    expect(normalizeSearchSite(" www.NestVault.in/ ")).toBe("sc-domain:nestvault.in");
+    expect(normalizeSearchSite("sc-domain:nestvault.in")).toBe("sc-domain:nestvault.in");
+  });
+  it("keeps URL-prefix properties with a trailing slash", () => {
+    expect(normalizeSearchSite("https://nestvault.in")).toBe("https://nestvault.in/");
+    expect(normalizeSearchSite("https://nestvault.in/")).toBe("https://nestvault.in/");
+  });
+  it("allows clearing and rejects junk", () => {
+    expect(normalizeSearchSite("  ")).toBe("");
+    expect(normalizeSearchSite("not a site")).toBeNull();
+    expect(normalizeSearchSite("https://")).toBeNull();
   });
 });
