@@ -39,7 +39,7 @@ Set the Supabase Auth Site URL to `https://nestvault.in` and add `https://nestva
 | `NEXT_PUBLIC_SITE_URL` | Public site origin, including protocol |
 | `NEXT_PUBLIC_GA4_MEASUREMENT_ID` | Optional GA4 web stream ID for page views and saved-enquiry events |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | OAuth client for read-only Search Console and GA4 reports |
-| `GOOGLE_TOKEN_ENCRYPTION_KEY` | Base64-encoded 32-byte key for stored Google tokens |
+| `GOOGLE_TOKEN_ENCRYPTION_KEY` | 32-byte key for stored Google tokens. Create it with `openssl rand -base64 32` (hex from `openssl rand -hex 32` also works). Changing it later means reconnecting Google. |
 
 Generate the token encryption key with `openssl rand -base64 32`. Keep it stable after connecting Google; changing it requires reconnecting the account.
 
