@@ -54,7 +54,7 @@ export default async function Analytics({ searchParams }: Props) {
     {query.connected && <p className="admin-success">Google connected. Select your properties below.</p>}
     {query.saved && <p className="admin-success">Properties saved.</p>}
     {query.disconnected && <p className="admin-success">Google disconnected.</p>}
-    {query.error && <p className="admin-error">{({ config: "Google OAuth is not configured in Vercel. Add the client ID, client secret, and token encryption key.", state: "Google sign-in expired or did not match this session. Try connecting again.", google: "Google authorization failed. Check the OAuth redirect URL and try again." } as Record<string, string>)[query.error] || "Google connection failed. Try connecting again."}</p>}
+    {query.error && <p className="admin-error">{({ config: "Google OAuth is not configured in Vercel. Add the client ID, client secret, and token encryption key.", state: "Google sign-in expired or did not match this session. Try connecting again.", google: "Google authorization failed. Check the OAuth redirect URL and try again.", search_site: "That Search Console property was not recognised. Enter your domain (nestvault.in) or the full URL (https://nestvault.in/).", ga4_property: "The GA4 property ID must be numbers only, like 540224670. It is not the G- measurement ID.", save: "Could not save the properties. Try again." } as Record<string, string>)[query.error] || "Google connection failed. Try connecting again."}</p>}
     {connectionError && <p className="admin-error">Could not check the saved Google connection: {connectionError.message}</p>}
     <section className="admin-card"><h2>Google connection</h2>
       <p>{connection ? "Connected with read-only access to Search Console and GA4." : "Connect a Google account with access to the Nest Vault Search Console and GA4 properties."}</p>
@@ -64,7 +64,7 @@ export default async function Analytics({ searchParams }: Props) {
       <div className="admin-row"><a className="admin-button" href="/api/admin/google/connect">{connection ? "Reconnect Google" : "Connect Google"}</a>
       {connection && <form action={disconnectGoogle}><button className="admin-button">Disconnect</button></form>}</div>
       {connection && <form action={saveAnalyticsSettings} className="admin-form">
-        <label>Search Console property<input name="search_site" defaultValue={connection.search_site || ""} placeholder="https://nestvault.in/ or sc-domain:nestvault.in" /></label>
+        <label>Search Console property<input name="search_site" defaultValue={connection.search_site || ""} placeholder="nestvault.in or https://nestvault.in/" /></label>
         <label>GA4 property ID<input name="ga4_property_id" defaultValue={connection.ga4_property_id || ""} placeholder="Numeric property ID, not measurement ID" /></label>
         <button>Save properties</button>
       </form>}

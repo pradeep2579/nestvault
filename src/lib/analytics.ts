@@ -33,3 +33,19 @@ export function parseTokenKey(raw: string | undefined) {
     : /^[A-Za-z0-9+/_-]+={0,2}$/.test(value) ? Buffer.from(value, "base64") : null;
   return key?.length === 32 ? key : null;
 }
+
+// Turns what admins type into a Search Console site ID: "nestvault.in" or "www.nestvault.in" becomes a domain
+// property (sc-domain:nestvault.in); full URLs become URL-prefix properties ending in "/". Returns null if unusable.
+export function normalizeSearchSite(raw: string) {
+  const value = raw.trim();
+  if (!value) return "";
+  const domain = /^sc-domain:/i.test(value) ? value.slice(10) : /^https?:\/\//i.test(value) ? null : value;
+  if (domain !== null) {
+    const host = domain.trim().toLowerCase().replace(/\/+$/, "").replace(/^www\./, "");
+    return /^([a-z0-9-]+\.)+[a-z]{2,}$/.test(host) ? `sc-domain:${host}` : null;
+  }
+  try {
+    const url = new URL(value);
+    return url.hostname.includes(".") ? `${url.protocol}//${url.host}${url.pathname.endsWith("/") ? url.pathname : `${url.pathname}/`}` : null;
+  } catch { return null; }
+}
