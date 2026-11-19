@@ -5,6 +5,17 @@ import { db } from "@/lib/supabase";
 const scopes = "https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/analytics.readonly";
 const redirectUri = () => new URL("/api/admin/google/callback", process.env.NEXT_PUBLIC_SITE_URL || "https://nestvault.in").toString();
 
+/** Names (never values) of the Google settings that are missing or invalid. */
+export function googleConfigProblems() {
+  const problems: string[] = [];
+  if (!process.env.GOOGLE_CLIENT_ID) problems.push("GOOGLE_CLIENT_ID is missing");
+  if (!process.env.GOOGLE_CLIENT_SECRET) problems.push("GOOGLE_CLIENT_SECRET is missing");
+  const key = process.env.GOOGLE_TOKEN_ENCRYPTION_KEY;
+  if (!key) problems.push("GOOGLE_TOKEN_ENCRYPTION_KEY is missing");
+  else if (Buffer.from(key, "base64").length !== 32) problems.push("GOOGLE_TOKEN_ENCRYPTION_KEY is not a 32-byte base64 value (create one with: openssl rand -base64 32)");
+  return problems;
+}
+
 function encryptionKey() {
   const key = Buffer.from(process.env.GOOGLE_TOKEN_ENCRYPTION_KEY || "", "base64");
   if (key.length !== 32) throw new Error("Google token encryption key must be 32 bytes, base64 encoded");

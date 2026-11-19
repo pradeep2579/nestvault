@@ -1,6 +1,6 @@
 import { db } from "@/lib/supabase";
 import { requirePageActor } from "@/lib/admin-page";
-import { googleToken, googlePost } from "@/lib/google";
+import { googleToken, googlePost, googleConfigProblems } from "@/lib/google";
 import { disconnectGoogle, saveAnalyticsSettings } from "./actions";
 
 type Props = { searchParams: Promise<{ days?: string; error?: string; saved?: string; connected?: string; disconnected?: string }> };
@@ -11,7 +11,8 @@ export default async function Analytics({ searchParams }: Props) {
   await requirePageActor(true);
   const query = await searchParams;
   const days = [7,28,90].includes(Number(query.days)) ? Number(query.days) : 28;
-  const oauthConfigured = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && Buffer.from(process.env.GOOGLE_TOKEN_ENCRYPTION_KEY || "", "base64").length === 32);
+  const configProblems = googleConfigProblems();
+  const oauthConfigured = configProblems.length === 0;
   const trackingConfigured = !!process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
   const { data: connection, error: connectionError } = await db().from("integrations").select("name,search_site,ga4_property_id").eq("name", "google").maybeSingle();
   let searchRows: GscRow[] = [], pageRows: GscRow[] = [], ga: GaRow[] = [], conversions = 0;
@@ -53,6 +54,7 @@ export default async function Analytics({ searchParams }: Props) {
     <section className="admin-card"><h2>Google connection</h2>
       <p>{connection ? "Connected with read-only access to Search Console and GA4." : "Connect a Google account with access to the Nest Vault Search Console and GA4 properties."}</p>
       {!oauthConfigured && <p className="admin-error">Google reporting setup is incomplete. Add the OAuth client ID, client secret, and token encryption key in Vercel.</p>}
+      {!oauthConfigured && <ul className="admin-error">{configProblems.map(problem => <li key={problem}>{problem}</li>)}</ul>}
       {!trackingConfigured && <p className="admin-error">GA4 website tracking is not configured. Add the web stream measurement ID in Vercel to collect new page views and saved enquiries.</p>}
       <div className="admin-row"><a className="admin-button" href="/api/admin/google/connect">{connection ? "Reconnect Google" : "Connect Google"}</a>
       {connection && <form action={disconnectGoogle}><button className="admin-button">Disconnect</button></form>}</div>
