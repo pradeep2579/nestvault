@@ -1,3 +1,4 @@
+import { istDate } from "@/lib/format";
 import { db } from "@/lib/supabase";
 import { requirePageActor } from "@/lib/admin-page";
 import { inviteTeamMember, updateTeamMember } from "./actions";
@@ -16,6 +17,6 @@ export default async function Team({ searchParams }: Props) {
         <td>{member.id === current.id ? `${member.role} · active` : <form action={updateTeamMember} className="admin-row" style={{ margin: 0 }}><input type="hidden" name="id" value={member.id} />
           <select name="role" defaultValue={member.role}><option value="staff">Staff</option><option value="owner">Owner</option></select>
           <label><input type="checkbox" name="active" defaultChecked={member.active} /> Active</label><button className="admin-button">Save</button></form>}</td>
-        <td>{new Date(member.created_at).toLocaleDateString("en-IN")}</td></tr>)}</tbody></table></div>
+        <td>{istDate(member.created_at)}</td></tr>)}</tbody></table></div>
     </section></>;
 }
