@@ -159,3 +159,8 @@ a.admin-card:hover{transform:translateY(-3px);box-shadow:0 17px 30px #05165017}
 .admin-lead-tools .admin-import-card{grid-template-columns:1fr;margin-top:0}
 .admin-manual-form input,.admin-manual-form select,.admin-manual-form textarea{max-width:100%;padding:10px 11px;border:1px solid #d7dbe3;border-radius:7px;background:#fff;color:var(--ink);font:inherit;font-size:.85rem}
 @media(max-width:1100px){.admin-lead-tools{grid-template-columns:1fr}}
+.admin-edit-details{margin-top:16px;padding-top:14px;border-top:1px solid #e4e9f0}
+.admin-edit-details summary{cursor:pointer;font-weight:700;margin-bottom:10px}
+.admin-danger-zone{margin-top:18px;padding-top:14px;border-top:1px solid #e4e9f0}
+.admin-main .admin-button-danger{background:#fff;color:#b42318;border-color:#e0b4af}
+.admin-main .admin-button-danger:hover{background:#b42318;color:#fff}
