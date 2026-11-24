@@ -4,6 +4,7 @@ import { istDateTime } from "@/lib/format";
 import { db } from "@/lib/supabase";
 import { stages, followUpOutcomes } from "@/lib/content";
 import { addNote, updateLead, updateLeadDetails } from "../actions";
+import { emailUrl, followUpMessage, whatsappUrl } from "@/lib/follow-up-messages";
 import DeleteLeadButton from "@/components/admin/DeleteLeadButton";
 import { requirePageActor } from "@/lib/admin-page";
 
@@ -57,6 +58,11 @@ export default async function LeadDetail({ params, searchParams }: Props) {
             <label>Date & time (India time)<input type="datetime-local" name={n === 1 ? "follow_up_at" : "follow_up_2_at"} defaultValue={inputDate(at)} /></label>
             <label>What the lead did<select name={`follow_up_${n}_outcome`} defaultValue={lead[`follow_up_${n}_outcome`] || ""}><option value="">Not yet followed up</option>
               {followUpOutcomes.map(item => <option key={item} value={item}>{item}</option>)}</select></label>
+            {(() => { const text = followUpMessage(n, lead); const wa = whatsappUrl(lead.phone, text); const mail = emailUrl(lead.email, n, text);
+              return <div><div className="admin-row">{wa && <a className="admin-button admin-button-outline" href={wa} target="_blank" rel="noopener noreferrer">Send on WhatsApp</a>}
+                {mail && <a className="admin-button admin-button-outline" href={mail}>Send email</a>}</div>
+                {!wa && !mail && <small>Add a phone number or email to send a message.</small>}
+                <details><summary className="admin-link">Preview message</summary><p style={{ whiteSpace: "pre-line" }}>{text}</p></details></div>; })()}
             <label>Note<input name={`follow_up_${n}_note`} defaultValue={lead[`follow_up_${n}_note`] || ""} maxLength={500} placeholder="e.g. Wants a tour on Saturday" /></label></fieldset>; })}
         <label>Tour time (India time)<input type="datetime-local" name="tour_at" defaultValue={inputDate(lead.tour_at)} /></label><button>Save lead</button>
       </form></section>
