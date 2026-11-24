@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { db, actor } from "@/lib/supabase";
-import { leadCsvColumns, readCsvLead } from "@/lib/leads-csv";
+import { leadCsvColumns, leadRecord, readCsvLead } from "@/lib/leads-csv";
 
 export async function POST(request: NextRequest) {
   if (!await actor()) return NextResponse.json({ error: "Sign in to add leads." }, { status: 401 });
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       if (data?.length) return NextResponse.json({ error: "A lead with this phone already exists.", id: data[0].id }, { status: 409 });
     }
     const dedupe_key = `offline:${createHash("sha256").update(identity).digest("hex")}`;
-    const { data, error } = await client.from("leads").upsert({ ...lead, source: "offline", dedupe_key }, { onConflict: "dedupe_key", ignoreDuplicates: true }).select("id");
+    const { data, error } = await client.from("leads").upsert({ ...leadRecord(lead), source: "offline", dedupe_key }, { onConflict: "dedupe_key", ignoreDuplicates: true }).select("id");
     if (error) return NextResponse.json({ error: "Could not save this lead." }, { status: 500 });
     if (!data?.length) return NextResponse.json({ error: "This contact already exists." }, { status: 409 });
     revalidatePath("/admin/leads");
