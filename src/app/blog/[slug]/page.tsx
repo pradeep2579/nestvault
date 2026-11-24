@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { publicPost, publicPosts } from "@/lib/public-data";
-import { absoluteUrl, safeHtml } from "@/lib/content";
+import { absoluteUrl, buttonizeLinks, safeHtml } from "@/lib/content";
 import Link from "next/link";
 
 // Cached for 5 minutes (so scheduled posts appear on time); admin saves refresh it immediately via revalidatePath.
@@ -47,7 +47,7 @@ export default async function ArticlePage({ params }: Props) {
           {post.excerpt && <p className="article-lede">{post.excerpt}</p>}
         </header>
         {post.cover_url && <figure className="article-cover" role="img" aria-label={post.cover_alt || post.title} style={{ backgroundImage: `url(${post.cover_url})` }} />}
-        <div className="article-content" dangerouslySetInnerHTML={{ __html: safeHtml(post.body_html) }} />
+        <div className="article-content" dangerouslySetInnerHTML={{ __html: buttonizeLinks(safeHtml(post.body_html)) }} />
         {post.button_url && post.button_label && <div className="article-button"><a href={post.button_url} className="btn-gold" target={post.button_url.startsWith("/") ? undefined : "_blank"} rel="noopener noreferrer">{post.button_label} ↗</a></div>}
         <div className="article-share"><span>Share this article</span>
           <a href={`https://wa.me/?text=${shareText}%20${shareUrl}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canEditPost, cleanUrl, isLivePost, normalizeRedirectPath, redirectWouldLoop, safeHtml, slugify, validRedirectPath } from "../src/lib/content";
+import { canEditPost, cleanUrl, isLivePost, normalizeRedirectPath, redirectWouldLoop, safeHtml, buttonizeLinks, slugify, validRedirectPath } from "../src/lib/content";
 
 describe("blog content and permissions", () => {
   it("keeps useful formatting and removes scripts and unsafe links", () => {
@@ -14,6 +14,11 @@ describe("blog content and permissions", () => {
     expect(html).toContain('class="article-btn"');
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer"');
+  });
+  it("turns link-only paragraphs into buttons but leaves inline links alone", () => {
+    expect(buttonizeLinks('<p><a href="https://a.com" target="_blank">https://a.com</a></p>')).toContain('class="article-btn"');
+    expect(buttonizeLinks('<p>See <a href="https://a.com">this</a>.</p>')).not.toContain("article-btn");
+    expect(buttonizeLinks('<p><a class="article-btn" href="https://a.com">Go</a></p>').match(/article-btn/g)).toHaveLength(1);
   });
   it("validates slugs and SEO URLs", () => {
     expect(slugify("  Better Work in Hyderabad! ")).toBe("better-work-in-hyderabad");
