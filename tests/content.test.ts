@@ -9,6 +9,12 @@ describe("blog content and permissions", () => {
     expect(html).not.toContain("javascript:");
     expect(html).toContain('alt="Desk"');
   });
+  it("keeps button links and opens external links safely", () => {
+    const html = safeHtml('<p><a class="article-btn evil" href="https://example.com">Go</a></p>');
+    expect(html).toContain('class="article-btn"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noopener noreferrer"');
+  });
   it("validates slugs and SEO URLs", () => {
     expect(slugify("  Better Work in Hyderabad! ")).toBe("better-work-in-hyderabad");
     expect(cleanUrl("javascript:alert(1)")).toBeNull();

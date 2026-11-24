@@ -8,7 +8,8 @@ import Link from "@tiptap/extension-link";
 export default function RichEditor({ initial }: { initial: string }) {
   const [error, setError] = useState("");
   const [html, setHtml] = useState(initial);
-  const editor = useEditor({ extensions: [StarterKit.configure({ link: false }), Image, Link.configure({ openOnClick: false })],
+  const editor = useEditor({ extensions: [StarterKit.configure({ link: false }), Image,
+      Link.extend({ addAttributes() { return { ...this.parent?.(), class: { default: null } }; } }).configure({ openOnClick: false })],
     content: initial, immediatelyRender: false, onUpdate: ({ editor }) => setHtml(editor.getHTML()) });
   const upload = async (file: File) => {
     setError("");
@@ -29,6 +30,12 @@ export default function RichEditor({ initial }: { initial: string }) {
       <button type="button" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>Heading</button>
       <button type="button" onClick={() => editor?.chain().focus().toggleBulletList().run()}>List</button>
       <button type="button" onClick={() => { const href = window.prompt("Link URL", "https://"); if (href) editor?.chain().focus().setLink({ href }).run(); }}>Link</button>
+      <button type="button" title="Insert a clickable button that opens a URL" onClick={() => {
+        const href = window.prompt("Button URL", "https://")?.trim();
+        if (!href || href === "https://") return;
+        const label = window.prompt("Button text", "Learn more")?.trim() || "Learn more";
+        editor?.chain().focus().insertContent({ type: "paragraph", content: [{ type: "text", text: label, marks: [{ type: "link", attrs: { href, class: "article-btn" } }] }] }).run();
+      }}>Button</button>
       <label className="admin-button" style={{ cursor: "pointer" }}>Insert image<input type="file" accept="image/png,image/jpeg,image/webp" style={{ display: "none" }} onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void upload(file); }} /></label>
     </div><EditorContent editor={editor} className="editor-content" />{error && <p role="alert" className="admin-error">{error}</p>}</div>;
 }
