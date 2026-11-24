@@ -60,3 +60,8 @@ export function redirectWouldLoop(rows: { source_path: string; destination_path:
   }
   return seen.has(next);
 }
+
+// A paragraph that contains nothing but one link becomes a button, so a pasted URL on its own line is clickable and obvious.
+export function buttonizeLinks(html: string) {
+  return html.replace(/<p>\s*<a ((?:(?!class=)[^>])*)>([^<]+)<\/a>\s*<\/p>/g, '<p><a class="article-btn" $1>$2</a></p>');
+}

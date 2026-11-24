@@ -7,6 +7,7 @@ export type Post = {
   published_at: string | null; seo_title: string | null; seo_description: string | null;
   canonical_url: string | null; social_image: string | null; noindex: boolean;
   schema_type: string; updated_at: string;
+  button_label?: string | null; button_url?: string | null;
 };
 
 export type HomeSeo = {

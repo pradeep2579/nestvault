@@ -394,13 +394,14 @@ body {
  .article-content img { max-width:100%; height:auto; }
  .article-content a { color:#9b7934; text-decoration:underline; text-underline-offset:3px; }
  .article-content a:hover { color:#051650; }
- /* Links added as buttons — or a paragraph that is only a link — show as a clear gold button */
- .article-content a.article-btn,.article-content p:has(> a:only-child:not(:has(*))) > a:only-child {
+ /* Links added as buttons (and paragraphs that are only a link) show as a clear gold button */
+ .article-content a.article-btn {
    display:inline-flex; align-items:center; gap:.5rem; padding:.9rem 2rem; background:linear-gradient(135deg,#a07820,#c9a84c);
    color:#fff; text-decoration:none; font:500 .875rem -apple-system,'Helvetica Neue',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase;
    transition:transform .2s,box-shadow .2s; }
- .article-content a.article-btn::after,.article-content p:has(> a:only-child:not(:has(*))) > a:only-child::after { content:"↗"; }
- .article-content a.article-btn:hover,.article-content p:has(> a:only-child:not(:has(*))) > a:only-child:hover { color:#fff; transform:translateY(-1px); box-shadow:0 8px 24px rgba(201,168,76,.4); }
+ .article-content a.article-btn::after { content:"↗"; }
+ .article-content a.article-btn:hover { color:#fff; transform:translateY(-1px); box-shadow:0 8px 24px rgba(201,168,76,.4); }
+ .article-button { margin:2.5rem 0 0; }
  .article-share { display:flex; flex-wrap:wrap; align-items:center; gap:.75rem; margin:3rem 0; padding:1.25rem 0; border-top:1px solid rgba(5,22,80,.12); border-bottom:1px solid rgba(5,22,80,.12); font-size:.9rem; }
  .article-share span { opacity:.65; margin-right:.5rem; }
  .article-share a { padding:.45rem 1rem; border:1px solid rgba(5,22,80,.25); color:#051650; }
