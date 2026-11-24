@@ -7,7 +7,7 @@ import { addNote, updateLead, updateLeadDetails } from "../actions";
 import DeleteLeadButton from "@/components/admin/DeleteLeadButton";
 import { requirePageActor } from "@/lib/admin-page";
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; detail?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; notice?: string; error?: string; detail?: string }> };
 const interests = ["Hot Desk (Day Pass)", "Dedicated Desk", "Private Cabin", "Meeting Room", "Virtual Office", "Event Space", "Just exploring"];
 const inputDate = (value: string | null) => value ? new Date(new Date(value).getTime() + 330 * 60000).toISOString().slice(0,16) : "";
 
@@ -25,6 +25,7 @@ export default async function LeadDetail({ params, searchParams }: Props) {
   const query = await searchParams;
   return <><div className="admin-row"><Link className="admin-link" href="/admin/leads">← Leads</Link></div><div className="admin-page-heading"><p className="admin-eyebrow">ENQUIRY DETAILS</p><h1>{lead.name}</h1><p>Review the conversation and plan the next step.</p></div>
     {query.saved && <p className="admin-success">Saved.</p>}
+    {query.notice === "migration" && <p className="admin-error" role="alert">Stage, tour and follow-up 1 date were saved, but follow-up outcomes, notes and Follow-up 2 need a one-time database update first. Ask your developer to run the follow-up migration.</p>}
     {query.error === "details" && <p className="admin-error" role="alert">{query.detail || "Check the details and try again."}</p>}
     {query.error === "date" && <p className="admin-error">Enter a valid follow-up and tour time in India time.</p>}
     <div className="admin-grid" style={{ gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr)" }}>
