@@ -15,7 +15,7 @@ export async function savePost(formData: FormData) {
   const coverAlt = String(formData.get("cover_alt") || "").trim().slice(0, 180);
   const intent = String(formData.get("intent") || "draft");
   const editPath = id ? `/admin/blog/${id}` : "/admin/blog/new";
-  if (!title || !slug || !["draft", "publish", "schedule"].includes(intent)) redirect(`${editPath}?error=article`);
+  if (!title || !slug || !["draft", "publish", "schedule", "update", "unpublish"].includes(intent)) redirect(`${editPath}?error=article`);
   const buttonLabel = String(formData.get("button_label") || "").trim().slice(0, 60);
   const rawButtonUrl = String(formData.get("button_url") || "").trim();
   const buttonUrl = cleanUrl(rawButtonUrl);
@@ -24,7 +24,7 @@ export async function savePost(formData: FormData) {
   if (["cover_url", "canonical_url", "social_image"].some(key => String(formData.get(key) || "").trim() && !cleanUrl(String(formData.get(key)))))
     redirect(`${editPath}?error=url`);
   if (intent !== "draft" && current.role !== "owner") throw new Error("Only owners can publish");
-  if (intent !== "draft" && coverUrl && !coverAlt) redirect(`${editPath}?error=alt`);
+  if (["publish", "schedule", "update"].includes(intent) && coverUrl && !coverAlt) redirect(`${editPath}?error=alt`);
   const old = id ? (await db().from("posts").select("status,slug,published_at,author_id").eq("id", id).maybeSingle()).data : null;
   if (id && !old) throw new Error("Article not found");
   if (old && !canEditPost(current, old))
@@ -33,8 +33,10 @@ export async function savePost(formData: FormData) {
   const scheduleTime = intent === "schedule" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(schedule)
     ? Date.parse(`${schedule}+05:30`) : NaN;
   if (intent === "schedule" && (!Number.isFinite(scheduleTime) || scheduleTime <= Date.now())) redirect(`${editPath}?error=schedule`);
-  const publishedAt = intent === "publish" ? new Date().toISOString() : intent === "schedule" ? new Date(scheduleTime).toISOString() : null;
-  const status = intent === "publish" ? "published" : intent === "schedule" ? "scheduled" : "draft";
+  // "update" edits a live or scheduled article without changing when it goes out; "unpublish" takes it back to a draft.
+  const keepLive = intent === "update" && !!old && old.status !== "draft";
+  const publishedAt = intent === "publish" ? new Date().toISOString() : intent === "schedule" ? new Date(scheduleTime).toISOString() : keepLive ? old.published_at : null;
+  const status = intent === "publish" ? "published" : intent === "schedule" ? "scheduled" : keepLive ? old.status : "draft";
   const payload = { title, slug, excerpt, body_html: body, status, published_at: publishedAt,
     cover_url: coverUrl,
     cover_alt: coverAlt || null,
@@ -57,4 +59,17 @@ export async function savePost(formData: FormData) {
   if (old?.slug) revalidatePath(`/blog/${old.slug}`);
   revalidatePath(`/blog/${slug}`);
   redirect(`/admin/blog/${result.data.id}?saved=1`);
+}
+
+export async function deletePost(formData: FormData) {
+  await requireActor(true);
+  const id = String(formData.get("id") || "");
+  if (!/^[0-9a-f-]{36}$/.test(id)) throw new Error("Invalid article");
+  const client = db();
+  const { data: post } = await client.from("posts").select("slug").eq("id", id).maybeSingle();
+  if (!post) redirect("/admin/blog");
+  const { error } = await client.from("posts").delete().eq("id", id);
+  if (error) throw new Error("Could not delete this article. Try again.");
+  revalidatePath("/"); revalidatePath("/blog"); revalidatePath("/sitemap.xml"); revalidatePath(`/blog/${post.slug}`);
+  redirect("/admin/blog?deleted=1");
 }

@@ -8,6 +8,7 @@ import { emailUrl, followUpMessage, whatsappUrl } from "@/lib/follow-up-messages
 import { attentionLabels } from "@/lib/crm";
 import DeleteLeadButton from "@/components/admin/DeleteLeadButton";
 import MergeLeadButton from "@/components/admin/MergeLeadButton";
+import SubmitButton from "@/components/admin/SubmitButton";
 import { requirePageActor } from "@/lib/admin-page";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; merged?: string; error?: string; detail?: string }> };
@@ -80,7 +81,7 @@ export default async function LeadDetail({ params, searchParams }: Props) {
           <label>Source<select name="channel" defaultValue={lead.channel || ""}><option value="">Not specified</option>{channels.map(item => <option key={item} value={item}>{item}</option>)}</select></label>
           <label>Message<textarea name="message" defaultValue={lead.message || ""} rows={3} maxLength={2000} /></label>
           <label style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" name="is_test" defaultChecked={lead.is_test} style={{ width: "auto" }} /> Test lead (hide from lists and reports)</label>
-          <button>Save details</button></form></details>
+          <SubmitButton>Save details</SubmitButton></form></details>
       {current.role === "owner" && <DeleteLeadButton id={id} name={lead.name} />}</section>
 
       {dupes.length > 0 && <section className="admin-card"><h2>Possible duplicates</h2><p className="crm-hint">Same email or phone number as this lead. Merging keeps this lead and moves their notes and history over.</p>
@@ -115,10 +116,10 @@ export default async function LeadDetail({ params, searchParams }: Props) {
           <label>Seats<input type="number" name="won_seats" min="1" step="1" inputMode="numeric" defaultValue={lead.won_seats ?? ""} /></label>
           <label>Start date<input type="date" name="won_start_date" defaultValue={lead.won_start_date || ""} /></label>
           <p className="crm-hint">Plan and monthly value are required when the stage is Won.</p></fieldset>
-        <button>Save lead</button>
+        <SubmitButton>Save lead</SubmitButton>
       </form></section>
     </div><section className="admin-card" style={{ marginTop: "1.5rem" }}><h2>Notes & activity</h2>
-      <form action={addNote} className="admin-form"><input type="hidden" name="lead_id" value={id} /><label>Add note<textarea name="body" required maxLength={2000} /></label><button>Add note</button></form>
+      <form action={addNote} className="admin-form"><input type="hidden" name="lead_id" value={id} /><label>Add note<textarea name="body" required maxLength={2000} /></label><SubmitButton pendingLabel="Adding…">Add note</SubmitButton></form>
       {timeline.length ? <ul className="crm-timeline">{timeline.map((item, i) => <li key={i}><time>{istDateTime(item.at)}</time><div>{item.note && <strong>Note: </strong>}{item.text}<small>{item.by}</small></div></li>)}</ul>
         : <p className="crm-muted" style={{ marginTop: "1rem" }}>Nothing yet. Stage changes, follow-ups and notes will appear here.</p>}
     </section></>;

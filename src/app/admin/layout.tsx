@@ -24,7 +24,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <AdminNav role={current.role} />
       <div className="admin-sidebar-bottom">
         <Link href="/" className="admin-website-link" target="_blank" rel="noopener noreferrer">View public site <span aria-hidden="true">↗</span></Link>
-        <div className="admin-account"><span className="admin-avatar" aria-hidden="true">{current.email.slice(0, 1).toUpperCase()}</span><span className="admin-account-text"><strong>{current.email}</strong><small>{current.role}</small></span></div>
+        <Link href="/admin/account" className="admin-account" aria-label="Your account and password"><span className="admin-avatar" aria-hidden="true">{current.email.slice(0, 1).toUpperCase()}</span><span className="admin-account-text"><strong>{current.email}</strong><small>{current.role} · account</small></span></Link>
         <form action={signOut}><button className="admin-signout">Sign out <span aria-hidden="true">→</span></button></form>
       </div>
     </aside>
