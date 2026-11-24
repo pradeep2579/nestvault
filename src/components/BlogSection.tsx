@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { Post } from "@/lib/public-data";
 
-export default function BlogSection({ posts }: { posts: Post[] }) {
+export default function BlogSection({ posts, asPage = false }: { posts: Post[]; asPage?: boolean }) {
+  const Heading = asPage ? "h1" : "h2";
   return <section id="blog" className="section-pad" style={{ background: "#f6f3ed", color: "#051650" }}>
     <div className="container">
       <div className="divider-gold" style={{ marginBottom: "1.25rem" }} />
       <p className="label">From Nest Vault</p>
-      <h2 className="h-section" style={{ margin: "0.75rem 0 2rem" }}>Ideas for better work</h2>
+      <Heading className="h-section" style={{ margin: "0.75rem 0 2rem" }}>Ideas for better work</Heading>
       {posts.length ? <div className="blog-cards">{posts.map(post =>
         <article key={post.id} className="blog-card">
           {post.cover_url && <div className="blog-card-image" style={{ backgroundImage: `url(${post.cover_url})` }} role="img" aria-label={post.cover_alt || post.title} />}

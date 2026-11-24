@@ -103,7 +103,7 @@ export default function SpaceTour() {
       }}
     >
       {/* Hidden audio element */}
-      <audio ref={audioRef} src="/videos/tour-music.mp3" loop preload="auto" />
+      <audio ref={audioRef} src="/videos/tour-music.mp3" loop preload="none" />
 
       <div className="container">
         {/* Header */}

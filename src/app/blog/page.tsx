@@ -12,5 +12,5 @@ export const metadata: Metadata = { title: "Blog", description: "Ideas and guide
 
 export default async function BlogPage() {
   const posts = await publicPosts();
-  return <><Navbar /><main style={{ paddingTop: 72 }}><div className="container" style={{ paddingTop: "4rem" }}><Link href="/">← Home</Link></div><BlogSection posts={posts} /></main><Footer /></>;
+  return <><Navbar /><main style={{ paddingTop: 72 }}><div className="container" style={{ paddingTop: "4rem" }}><Link href="/">← Home</Link></div><BlogSection posts={posts} asPage /></main><Footer /></>;
 }
