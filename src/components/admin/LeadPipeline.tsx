@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useTransition, type PointerEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { Stage } from "@/lib/content";
+import { lostReasons } from "@/lib/options";
 import { moveLeadStage } from "@/app/admin/leads/actions";
 
 type LeadCard = { id: string; name: string; email: string; phone: string | null; interest: string | null;
-  created_at: string; follow_up_at: string | null; tour_at: string | null };
+  created_at: string; follow_up_at: string | null; tour_at: string | null; won_plan: string | null; won_value: number | null };
 export type PipelineColumn = { stage: Stage; count: number; leads: LeadCard[] };
 
 const visibleLimit = 100;
@@ -21,6 +22,7 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
   const [overStage, setOverStage] = useState<Stage | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [pendingLost, setPendingLost] = useState<{ id: string; name: string; reason: string } | null>(null);
   const [ghost, setGhost] = useState<{ x: number; y: number; name: string } | null>(null);
   const pointer = useRef<{ id: string; pointerId: number; x: number; y: number; name: string; moved: boolean } | null>(null);
   const removePointerListeners = useRef<(() => void) | null>(null);
@@ -28,11 +30,16 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
 
   useEffect(() => () => removePointerListeners.current?.(), []);
 
-  function move(id: string, target: Stage) {
+  function move(id: string, target: Stage, lostReason?: string) {
     if (savingId) return;
     const source = columns.find(column => column.leads.some(lead => lead.id === id));
     const lead = source?.leads.find(item => item.id === id);
     if (!source || !lead || source.stage === target) return;
+    // Some stages need details first: ask for the lost reason here, send the rest to the lead page.
+    if (target === "lost" && !lostReason) { setError(""); setPendingLost({ id, name: lead.name, reason: "" }); return; }
+    if (target === "tour_scheduled" && !lead.tour_at) { router.push(`/admin/leads/${id}?error=need_tour`); return; }
+    if (target === "won" && !(lead.won_plan && Number(lead.won_value) > 0)) { router.push(`/admin/leads/${id}?error=need_won`); return; }
+    setPendingLost(null);
     const before = columns;
     setError("");
     setSavingId(id);
@@ -42,7 +49,7 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
       return column;
     }));
     startTransition(async () => {
-      try { await moveLeadStage(id, target); router.refresh(); }
+      try { await moveLeadStage(id, target, lostReason); router.refresh(); }
       catch (cause) {
         setColumns(before);
         setError(cause instanceof Error ? cause.message : "Could not move the lead. Please try again.");
@@ -109,6 +116,11 @@ export default function LeadPipeline({ initialColumns }: { initialColumns: Pipel
   return <>
     <p className="admin-pipeline-hint">Drag a lead into another stage, or use its stage menu. Open a card for notes, follow-ups, and tours.</p>
     {error && <p className="admin-error" role="alert">{error}</p>}
+    {pendingLost && <div className="crm-lost-panel" role="group" aria-label="Why was this lead lost?"><label>Why was {pendingLost.name} lost?
+      <select value={pendingLost.reason} onChange={event => setPendingLost({ ...pendingLost, reason: event.target.value })}><option value="">Choose a reason</option>
+        {lostReasons.map(item => <option key={item} value={item}>{item}</option>)}</select></label>
+      <div className="admin-row" style={{ marginTop: 12, marginBottom: 0 }}><button className="admin-button" disabled={!pendingLost.reason} onClick={() => move(pendingLost.id, "lost", pendingLost.reason)}>Mark as lost</button>
+        <button className="admin-button admin-button-outline" onClick={() => setPendingLost(null)}>Cancel</button></div></div>}
     <div className="admin-pipeline" aria-label="Lead pipeline">{columns.map(column => <section
       className={`admin-pipeline-column${overStage === column.stage ? " is-drop-target" : ""}`}
       key={column.stage}

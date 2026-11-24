@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const interests = ["Hot Desk (Day Pass)", "Dedicated Desk", "Private Cabin", "Meeting Room", "Virtual Office", "Event Space", "Just exploring"];
+import { interests, offlineChannels, moveInOptions, budgetOptions } from "@/lib/options";
 
 export default function LeadManualForm() {
   const router = useRouter();
@@ -37,6 +37,12 @@ export default function LeadManualForm() {
       <label htmlFor="lead-company">Company</label><input id="lead-company" name="company" maxLength={120} autoComplete="off" />
       <label htmlFor="lead-interest">Interested in</label>
       <select id="lead-interest" name="interest" defaultValue=""><option value="">Not specified</option>{interests.map(item => <option key={item} value={item}>{item}</option>)}</select>
+      <label htmlFor="lead-channel">How did they find you?</label>
+      <select id="lead-channel" name="channel" defaultValue="Walk-in">{offlineChannels.map(item => <option key={item} value={item}>{item}</option>)}</select>
+      <label htmlFor="lead-movein">Wants to start</label>
+      <select id="lead-movein" name="move_in" defaultValue=""><option value="">Not specified</option>{moveInOptions.map(item => <option key={item} value={item}>{item}</option>)}</select>
+      <label htmlFor="lead-budget">Monthly budget</label>
+      <select id="lead-budget" name="budget" defaultValue=""><option value="">Not specified</option>{budgetOptions.map(item => <option key={item} value={item}>{item}</option>)}</select>
       <label htmlFor="lead-message">Notes</label><textarea id="lead-message" name="message" rows={3} maxLength={2000} />
       <button className="admin-button" disabled={busy}>{busy ? "Saving…" : "Add lead"}</button>
     </form>

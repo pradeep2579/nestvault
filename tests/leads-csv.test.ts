@@ -33,6 +33,15 @@ describe("lead CSV", () => {
     expect(Object.keys(leadRecord(lead))).toContain("follow_up_at");
   });
 
+  it("reads source, start timing and budget, and rejects unknown values", () => {
+    const columns = importColumns(["name", "email", "channel", "move_in", "budget"]);
+    expect(readCsvLead(columns, ["Asha", "asha@example.com", "walk-in", "within 1 month", "₹5,000 - ₹15,000 / month"]))
+      .toMatchObject({ channel: "Walk-in", move_in: "Within 1 month", budget: "₹5,000 - ₹15,000 / month" });
+    expect(() => readCsvLead(columns, ["Asha", "asha@example.com", "billboard", "", ""])).toThrow("Invalid channel");
+    expect(readCsvLead(importColumns(["name", "email"]), ["Asha", "asha@example.com"])).toMatchObject({ channel: null, move_in: null, budget: null });
+    expect(Object.keys(leadRecord(readCsvLead(importColumns(["name", "email"]), ["Asha", "asha@example.com"])))).not.toContain("channel");
+  });
+
   it("escapes spreadsheet formulas in exports", () => {
     const csv = toCsv([{ name: "=HYPERLINK(\"evil\")", phone: "+919876543210" }], ["name", "phone"]);
     expect(csv).toContain("'=");

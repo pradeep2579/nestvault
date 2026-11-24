@@ -1,6 +1,7 @@
 import sanitizeHtml from "sanitize-html";
 
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nestvault.in";
+export * from "./options";
 export const stages = ["new", "contacted", "tour_scheduled", "tour_completed", "won", "lost"] as const;
 export type Stage = typeof stages[number];
 export const followUpOutcomes = ["Not reached", "Interested", "Needs more info", "Call back later", "Tour booked", "Tour completed", "Ready to join", "Not interested"] as const;

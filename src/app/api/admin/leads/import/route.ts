@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     let imported = 0;
     for (let offset = 0; offset < toInsert.length; offset += 50) {
       const batch = toInsert.slice(offset, offset + 50);
-      const { data: saved, error } = await client.from("leads").upsert(batch.map(item => ({ ...leadRecord(item.lead), source: "offline", dedupe_key: item.key })),
+      const { data: saved, error } = await client.from("leads").upsert(batch.map(item => ({ ...leadRecord(item.lead), channel: item.lead.channel || "Other", source: "offline", dedupe_key: item.key })),
         { onConflict: "dedupe_key", ignoreDuplicates: true }).select("id");
       if (error) { batch.forEach(item => errors.push({ row: item.row, message: "Could not save this row" })); continue; }
       imported += saved?.length || 0;

@@ -3,9 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { db, actor } from "@/lib/supabase";
 import { leadCsvColumns, leadRecord, readCsvLead } from "@/lib/leads-csv";
+import { phoneKey } from "@/lib/crm";
+import { logActivity } from "@/lib/lead-activity";
 
 export async function POST(request: NextRequest) {
-  if (!await actor()) return NextResponse.json({ error: "Sign in to add leads." }, { status: 401 });
+  const current = await actor();
+  if (!current) return NextResponse.json({ error: "Sign in to add leads." }, { status: 401 });
   const origin = request.headers.get("origin");
   if (origin && new URL(origin).host !== request.nextUrl.host) return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
 
@@ -26,14 +29,15 @@ export async function POST(request: NextRequest) {
       if (data?.length) return NextResponse.json({ error: "A lead with this email already exists.", id: data[0].id }, { status: 409 });
     }
     if (lead.phone) {
-      const { data, error } = await client.from("leads").select("id").eq("phone", lead.phone).limit(1);
+      const { data, error } = await client.from("leads").select("id").eq("phone_key", phoneKey(lead.phone)).limit(1);
       if (error) throw error;
       if (data?.length) return NextResponse.json({ error: "A lead with this phone already exists.", id: data[0].id }, { status: 409 });
     }
     const dedupe_key = `offline:${createHash("sha256").update(identity).digest("hex")}`;
-    const { data, error } = await client.from("leads").upsert({ ...leadRecord(lead), source: "offline", dedupe_key }, { onConflict: "dedupe_key", ignoreDuplicates: true }).select("id");
+    const { data, error } = await client.from("leads").upsert({ ...leadRecord(lead), channel: lead.channel || "Other", assigned_to: current.id, source: "offline", dedupe_key }, { onConflict: "dedupe_key", ignoreDuplicates: true }).select("id");
     if (error) return NextResponse.json({ error: "Could not save this lead." }, { status: 500 });
     if (!data?.length) return NextResponse.json({ error: "This contact already exists." }, { status: 409 });
+    await logActivity(client, data[0].id, current.id, "created", `Added by hand (${lead.channel || "Other"})`);
     revalidatePath("/admin/leads");
     return NextResponse.json({ id: data[0].id });
   } catch (error) {

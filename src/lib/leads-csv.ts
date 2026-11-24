@@ -1,12 +1,14 @@
-import { stages, followUpOutcomes, type Stage } from "./content";
+import { stages, followUpOutcomes, channels, moveInOptions, budgetOptions, type Stage } from "./content";
 
-export const leadCsvColumns = ["name", "email", "phone", "company", "interest", "team_size", "message", "stage", "follow_up_at", "follow_up_1_outcome", "follow_up_1_note", "follow_up_2_at", "follow_up_2_outcome", "follow_up_2_note", "tour_at"] as const;
+export const leadCsvColumns = ["name", "email", "phone", "company", "interest", "team_size", "message", "stage", "follow_up_at", "follow_up_1_outcome", "follow_up_1_note", "follow_up_2_at", "follow_up_2_outcome", "follow_up_2_note", "tour_at", "channel", "move_in", "budget"] as const;
 export type CsvLead = { name: string; email: string; phone: string; company: string; interest: string; team_size: string; message: string; stage: Stage; follow_up_at: string | null; tour_at: string | null;
-  follow_up_1_outcome: string | null; follow_up_1_note: string | null; follow_up_2_at: string | null; follow_up_2_outcome: string | null; follow_up_2_note: string | null };
+  follow_up_1_outcome: string | null; follow_up_1_note: string | null; follow_up_2_at: string | null; follow_up_2_outcome: string | null; follow_up_2_note: string | null;
+  channel: string | null; move_in: string | null; budget: string | null };
 
-// Leave out empty follow-up fields so saving a lead without them never touches those columns.
+// Leave out empty optional fields so a save never touches columns the person did not fill in.
+const optionalKeys = ["follow_up_1_outcome", "follow_up_1_note", "follow_up_2_at", "follow_up_2_outcome", "follow_up_2_note", "channel", "move_in", "budget"];
 export function leadRecord(lead: CsvLead) {
-  return Object.fromEntries(Object.entries(lead).filter(([key, value]) => !(key.startsWith("follow_up_") && key !== "follow_up_at" && value === null)));
+  return Object.fromEntries(Object.entries(lead).filter(([key, value]) => !(optionalKeys.includes(key) && value === null)));
 }
 
 export function parseCsv(input: string): string[][] {
@@ -82,7 +84,15 @@ export function readCsvLead(columns: string[], values: string[]): CsvLead {
     if (!match) throw new Error(`Invalid ${key}`);
     return match;
   };
+  const pick = (key: string, allowed: readonly string[]) => {
+    const value = (row[key] || "").toLowerCase();
+    if (!value) return null;
+    const match = allowed.find(item => item.toLowerCase() === value);
+    if (!match) throw new Error(`Invalid ${key}`);
+    return match;
+  };
   return { name, email, phone, company: row.company || "", interest: row.interest || "", team_size: row.team_size || "", message: row.message || "", stage: stage as Stage,
     follow_up_at: date("follow_up_at"), follow_up_1_outcome: outcome("follow_up_1_outcome"), follow_up_1_note: row.follow_up_1_note || null,
-    follow_up_2_at: date("follow_up_2_at"), follow_up_2_outcome: outcome("follow_up_2_outcome"), follow_up_2_note: row.follow_up_2_note || null, tour_at: date("tour_at") };
+    follow_up_2_at: date("follow_up_2_at"), follow_up_2_outcome: outcome("follow_up_2_outcome"), follow_up_2_note: row.follow_up_2_note || null, tour_at: date("tour_at"),
+    channel: pick("channel", channels), move_in: pick("move_in", moveInOptions), budget: pick("budget", budgetOptions) };
 }

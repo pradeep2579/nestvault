@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { readAttribution } from "@/components/AttributionCapture";
+import { moveInOptions, budgetOptions } from "@/lib/options";
 
-type FormData = { name:string; email:string; phone:string; company:string; interest:string; teamSize:string; message:string; };
+type FormData = { name:string; email:string; phone:string; company:string; interest:string; teamSize:string; moveIn:string; budget:string; message:string; };
 const interests = ["Hot Desk (Day Pass)","Dedicated Desk","Private Cabin","Meeting Room","Virtual Office","Event Space","Just exploring"];
 
 function useInView(threshold = 0.1) {
@@ -23,7 +25,7 @@ function useInView(threshold = 0.1) {
 
 export default function Contact() {
   const { ref, inView } = useInView();
-  const [form, setForm] = useState<FormData>({ name:"",email:"",phone:"",company:"",interest:"",teamSize:"",message:"" });
+  const [form, setForm] = useState<FormData>({ name:"",email:"",phone:"",company:"",interest:"",teamSize:"",moveIn:"",budget:"",message:"" });
   const [status, setStatus] = useState<"idle"|"submitting"|"success"|"error">("idle");
   const [honeypot, setHoneypot] = useState("");
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -51,6 +53,8 @@ export default function Contact() {
       form.company  ? `🏢 *Company:* ${form.company}`       : null,
       form.interest ? `💼 *Interested In:* ${form.interest}` : null,
       form.teamSize ? `👥 *Team Size:* ${form.teamSize}`    : null,
+      form.moveIn   ? `📅 *Move-in:* ${form.moveIn}`        : null,
+      form.budget   ? `💰 *Budget:* ${form.budget}`         : null,
       form.message  ? `💬 *Message:* ${form.message}`       : null,
       "",
       "_Sent from nestvault.in_",
@@ -60,13 +64,13 @@ export default function Contact() {
 
     try {
       const response = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, requestId: submitId, website: honeypot }) });
+        body: JSON.stringify({ ...form, ...readAttribution(), requestId: submitId, website: honeypot }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not save enquiry");
       setWhatsAppUrl(waUrl);
       if (popup) { popup.opener = null; popup.location.href = waUrl; }
       setStatus("success");
-      setForm({ name:"", email:"", phone:"", company:"", interest:"", teamSize:"", message:"" });
+      setForm({ name:"", email:"", phone:"", company:"", interest:"", teamSize:"", moveIn:"", budget:"", message:"" });
       setRequestId(null);
       (window as Window & { gtag?: (...args: unknown[]) => void }).gtag?.("event", "generate_lead", { currency: "INR", value: 1 });
     } catch (error) {
@@ -163,8 +167,8 @@ export default function Contact() {
                 </div>
                 <div className="contact-form-row" style={{ marginTop:"1.125rem" }}>
                   <div>
-                    <label style={lbl}>Phone</label>
-                    <input type="tel" value={form.phone} onChange={update("phone")} placeholder="+91 91426 96666" style={inp} onFocus={focus} onBlur={blur} />
+                    <label style={lbl}>Phone / WhatsApp *</label>
+                    <input required type="tel" minLength={10} value={form.phone} onChange={update("phone")} placeholder="+91 91426 96666" style={inp} onFocus={focus} onBlur={blur} />
                   </div>
                   <div>
                     <label style={lbl}>Company</label>
@@ -184,6 +188,22 @@ export default function Contact() {
                     <select value={form.teamSize} onChange={update("teamSize")} style={{ ...inp, cursor:"pointer" }}>
                       <option value="" style={{ background:"#1a1a1a" }}>Select size</option>
                       {["Just me","2–5","6–10","11–20","20+"].map(o => <option key={o} value={o} style={{ background:"#1a1a1a" }}>{o}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="contact-form-row" style={{ marginTop:"1.125rem" }}>
+                  <div>
+                    <label style={lbl}>When do you want to start?</label>
+                    <select value={form.moveIn} onChange={update("moveIn")} style={{ ...inp, cursor:"pointer" }}>
+                      <option value="" style={{ background:"#1a1a1a" }}>Select timing</option>
+                      {moveInOptions.map(o => <option key={o} value={o} style={{ background:"#1a1a1a" }}>{o}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={lbl}>Monthly budget</label>
+                    <select value={form.budget} onChange={update("budget")} style={{ ...inp, cursor:"pointer" }}>
+                      <option value="" style={{ background:"#1a1a1a" }}>Select budget</option>
+                      {budgetOptions.map(o => <option key={o} value={o} style={{ background:"#1a1a1a" }}>{o}</option>)}
                     </select>
                   </div>
                 </div>
