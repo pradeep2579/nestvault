@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { importColumns, parseCsv, readCsvLead, toCsv } from "../src/lib/leads-csv";
+import { importColumns, leadRecord, parseCsv, readCsvLead, toCsv } from "../src/lib/leads-csv";
 
 describe("lead CSV", () => {
   it("reads quoted commas, line breaks, and UTF-8 BOM", () => {
@@ -17,6 +17,20 @@ describe("lead CSV", () => {
   it("requires timezone on imported dates", () => {
     const columns = importColumns(["name", "email", "follow_up_at"]);
     expect(() => readCsvLead(columns, ["Asha", "asha@example.com", "2026-11-06T09:00"])).toThrow("timezone");
+  });
+
+  it("reads follow-up outcomes and notes, and rejects unknown outcomes", () => {
+    const columns = importColumns(["name", "email", "follow_up_1", "follow_up_1_outcome", "follow_up_2_outcome", "follow_up_2_note"]);
+    const lead = readCsvLead(columns, ["Asha", "asha@example.com", "2026-11-06T09:00:00+05:30", "tour booked", "Call back later", "Busy till Friday"]);
+    expect(lead).toMatchObject({ follow_up_1_outcome: "Tour booked", follow_up_2_outcome: "Call back later", follow_up_2_note: "Busy till Friday", follow_up_2_at: null });
+    expect(lead.follow_up_at).toBe("2026-11-06T03:30:00.000Z");
+    expect(() => readCsvLead(importColumns(["name", "email", "follow_up_1_outcome"]), ["Asha", "asha@example.com", "maybe"])).toThrow("Invalid follow_up_1_outcome");
+  });
+
+  it("omits empty follow-up fields from saved records", () => {
+    const lead = readCsvLead(importColumns(["name", "email"]), ["Asha", "asha@example.com"]);
+    expect(Object.keys(leadRecord(lead))).not.toContain("follow_up_1_outcome");
+    expect(Object.keys(leadRecord(lead))).toContain("follow_up_at");
   });
 
   it("escapes spreadsheet formulas in exports", () => {

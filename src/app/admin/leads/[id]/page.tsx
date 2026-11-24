@@ -2,12 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { istDateTime } from "@/lib/format";
 import { db } from "@/lib/supabase";
-import { stages } from "@/lib/content";
+import { stages, followUpOutcomes } from "@/lib/content";
 import { addNote, updateLead, updateLeadDetails } from "../actions";
+import { emailUrl, followUpMessage, whatsappUrl } from "@/lib/follow-up-messages";
 import DeleteLeadButton from "@/components/admin/DeleteLeadButton";
 import { requirePageActor } from "@/lib/admin-page";
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; detail?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; notice?: string; error?: string; detail?: string }> };
 const interests = ["Hot Desk (Day Pass)", "Dedicated Desk", "Private Cabin", "Meeting Room", "Virtual Office", "Event Space", "Just exploring"];
 const inputDate = (value: string | null) => value ? new Date(new Date(value).getTime() + 330 * 60000).toISOString().slice(0,16) : "";
 
@@ -25,6 +26,7 @@ export default async function LeadDetail({ params, searchParams }: Props) {
   const query = await searchParams;
   return <><div className="admin-row"><Link className="admin-link" href="/admin/leads">← Leads</Link></div><div className="admin-page-heading"><p className="admin-eyebrow">ENQUIRY DETAILS</p><h1>{lead.name}</h1><p>Review the conversation and plan the next step.</p></div>
     {query.saved && <p className="admin-success">Saved.</p>}
+    {query.notice === "migration" && <p className="admin-error" role="alert">Stage, tour and follow-up 1 date were saved, but follow-up outcomes, notes and Follow-up 2 need a one-time database update first. Ask your developer to run the follow-up migration.</p>}
     {query.error === "details" && <p className="admin-error" role="alert">{query.detail || "Check the details and try again."}</p>}
     {query.error === "date" && <p className="admin-error">Enter a valid follow-up and tour time in India time.</p>}
     <div className="admin-grid" style={{ gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr)" }}>
@@ -51,7 +53,17 @@ export default async function LeadDetail({ params, searchParams }: Props) {
         <input type="hidden" name="id" value={id} />
         <label>Stage<select name="stage" defaultValue={lead.stage}>{stages.map(s => <option key={s} value={s}>{s.replaceAll("_", " ")}</option>)}</select></label>
         <label>Assigned to<select name="assigned_to" defaultValue={lead.assigned_to || ""}><option value="">Unassigned</option>{(staff || []).map(s => <option key={s.id} value={s.id}>{s.email}</option>)}</select></label>
-        <label>Follow up (India time)<input type="datetime-local" name="follow_up_at" defaultValue={inputDate(lead.follow_up_at)} /></label>
+        {([1, 2] as const).map(n => { const at = n === 1 ? lead.follow_up_at : lead.follow_up_2_at;
+          return <fieldset key={n} className="admin-form" style={{ border: "1px solid #e4e9f0", borderRadius: 8, padding: "0.75rem" }}><legend>Follow-up {n}</legend>
+            <label>Date & time (India time)<input type="datetime-local" name={n === 1 ? "follow_up_at" : "follow_up_2_at"} defaultValue={inputDate(at)} /></label>
+            <label>What the lead did<select name={`follow_up_${n}_outcome`} defaultValue={lead[`follow_up_${n}_outcome`] || ""}><option value="">Not yet followed up</option>
+              {followUpOutcomes.map(item => <option key={item} value={item}>{item}</option>)}</select></label>
+            {(() => { const text = followUpMessage(n, lead); const wa = whatsappUrl(lead.phone, text); const mail = emailUrl(lead.email, n, text);
+              return <div><div className="admin-row">{wa && <a className="admin-button admin-button-outline" href={wa} target="_blank" rel="noopener noreferrer">Send on WhatsApp</a>}
+                {mail && <a className="admin-button admin-button-outline" href={mail}>Send email</a>}</div>
+                {!wa && !mail && <small>Add a phone number or email to send a message.</small>}
+                <details><summary className="admin-link">Preview message</summary><p style={{ whiteSpace: "pre-line" }}>{text}</p></details></div>; })()}
+            <label>Note<input name={`follow_up_${n}_note`} defaultValue={lead[`follow_up_${n}_note`] || ""} maxLength={500} placeholder="e.g. Wants a tour on Saturday" /></label></fieldset>; })}
         <label>Tour time (India time)<input type="datetime-local" name="tour_at" defaultValue={inputDate(lead.tour_at)} /></label><button>Save lead</button>
       </form></section>
     </div><section className="admin-card" style={{ marginTop: "1.5rem" }}><h2>Notes</h2>

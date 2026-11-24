@@ -1,7 +1,13 @@
-import { stages, type Stage } from "./content";
+import { stages, followUpOutcomes, type Stage } from "./content";
 
-export const leadCsvColumns = ["name", "email", "phone", "company", "interest", "team_size", "message", "stage", "follow_up_at", "tour_at"] as const;
-export type CsvLead = { name: string; email: string; phone: string; company: string; interest: string; team_size: string; message: string; stage: Stage; follow_up_at: string | null; tour_at: string | null };
+export const leadCsvColumns = ["name", "email", "phone", "company", "interest", "team_size", "message", "stage", "follow_up_at", "follow_up_1_outcome", "follow_up_1_note", "follow_up_2_at", "follow_up_2_outcome", "follow_up_2_note", "tour_at"] as const;
+export type CsvLead = { name: string; email: string; phone: string; company: string; interest: string; team_size: string; message: string; stage: Stage; follow_up_at: string | null; tour_at: string | null;
+  follow_up_1_outcome: string | null; follow_up_1_note: string | null; follow_up_2_at: string | null; follow_up_2_outcome: string | null; follow_up_2_note: string | null };
+
+// Leave out empty follow-up fields so saving a lead without them never touches those columns.
+export function leadRecord(lead: CsvLead) {
+  return Object.fromEntries(Object.entries(lead).filter(([key, value]) => !(key.startsWith("follow_up_") && key !== "follow_up_at" && value === null)));
+}
 
 export function parseCsv(input: string): string[][] {
   const text = input.replace(/^\uFEFF/, "");
@@ -39,8 +45,8 @@ export function toCsv(rows: Record<string, unknown>[], columns: readonly string[
   return [columns.join(","), ...rows.map(row => columns.map(column => csvCell(row[column])).join(","))].join("\r\n") + "\r\n";
 }
 
-const aliases: Record<string, string> = { full_name: "name", mobile: "phone", phone_number: "phone", notes: "message", status: "stage", follow_up: "follow_up_at", tour_date: "tour_at" };
-const limits: Record<string, number> = { name: 120, email: 254, phone: 50, company: 120, interest: 80, team_size: 50, message: 2000 };
+const aliases: Record<string, string> = { full_name: "name", mobile: "phone", phone_number: "phone", notes: "message", status: "stage", follow_up: "follow_up_at", follow_up_1: "follow_up_at", follow_up_1_date: "follow_up_at", follow_up_2: "follow_up_2_at", follow_up_2_date: "follow_up_2_at", tour_date: "tour_at" };
+const limits: Record<string, number> = { name: 120, email: 254, phone: 50, company: 120, interest: 80, team_size: 50, message: 2000, follow_up_1_note: 500, follow_up_2_note: 500 };
 
 export function importColumns(header: string[]) {
   const columns = header.map(value => {
@@ -69,5 +75,14 @@ export function readCsvLead(columns: string[], values: string[]): CsvLead {
     if (Number.isNaN(parsed.getTime())) throw new Error(`Invalid ${key}`);
     return parsed.toISOString();
   };
-  return { name, email, phone, company: row.company || "", interest: row.interest || "", team_size: row.team_size || "", message: row.message || "", stage: stage as Stage, follow_up_at: date("follow_up_at"), tour_at: date("tour_at") };
+  const outcome = (key: string) => {
+    const value = (row[key] || "").toLowerCase().replace(/[\s_-]+/g, " ");
+    if (!value) return null;
+    const match = followUpOutcomes.find(item => item.toLowerCase() === value);
+    if (!match) throw new Error(`Invalid ${key}`);
+    return match;
+  };
+  return { name, email, phone, company: row.company || "", interest: row.interest || "", team_size: row.team_size || "", message: row.message || "", stage: stage as Stage,
+    follow_up_at: date("follow_up_at"), follow_up_1_outcome: outcome("follow_up_1_outcome"), follow_up_1_note: row.follow_up_1_note || null,
+    follow_up_2_at: date("follow_up_2_at"), follow_up_2_outcome: outcome("follow_up_2_outcome"), follow_up_2_note: row.follow_up_2_note || null, tour_at: date("tour_at") };
 }

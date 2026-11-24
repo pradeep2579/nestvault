@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { db, actor } from "@/lib/supabase";
-import { importColumns, parseCsv, readCsvLead } from "@/lib/leads-csv";
+import { importColumns, leadRecord, parseCsv, readCsvLead } from "@/lib/leads-csv";
 
 const maxBytes = 1024 * 1024;
 const maxRows = 500;
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     let imported = 0;
     for (let offset = 0; offset < toInsert.length; offset += 50) {
       const batch = toInsert.slice(offset, offset + 50);
-      const { data: saved, error } = await client.from("leads").upsert(batch.map(item => ({ ...item.lead, source: "offline", dedupe_key: item.key })),
+      const { data: saved, error } = await client.from("leads").upsert(batch.map(item => ({ ...leadRecord(item.lead), source: "offline", dedupe_key: item.key })),
         { onConflict: "dedupe_key", ignoreDuplicates: true }).select("id");
       if (error) { batch.forEach(item => errors.push({ row: item.row, message: "Could not save this row" })); continue; }
       imported += saved?.length || 0;

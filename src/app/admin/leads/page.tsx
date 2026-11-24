@@ -10,6 +10,17 @@ import LeadPipeline from "@/components/admin/LeadPipeline";
 
 type Props = { searchParams: Promise<{ q?: string; stage?: string; page?: string; view?: string; deleted?: string }> };
 const stageName = (stage: string) => stage.replaceAll("_", " ");
+type FollowUpFields = { follow_up_at: string | null; follow_up_1_outcome: string | null; follow_up_2_at: string | null; follow_up_2_outcome: string | null; tour_at: string | null };
+// The first follow-up that is scheduled but has no outcome yet, otherwise the tour.
+function nextAction(lead: FollowUpFields) {
+  if (lead.follow_up_at && !lead.follow_up_1_outcome) return `Follow-up 1 · ${istDateTime(lead.follow_up_at)}`;
+  if (lead.follow_up_2_at && !lead.follow_up_2_outcome) return `Follow-up 2 · ${istDateTime(lead.follow_up_2_at)}`;
+  return lead.tour_at ? `Tour ${istDateTime(lead.tour_at)}` : "—";
+}
+function FollowUp({ at, outcome }: { at: string | null; outcome: string | null }) {
+  if (!at && !outcome) return <>—</>;
+  return <>{at ? istDate(at) : ""}{outcome && <><br /><small><strong>{outcome}</strong></small></>}</>;
+}
 
 export default async function LeadsPage({ searchParams }: Props) {
   await requirePageActor();
@@ -39,11 +50,12 @@ export default async function LeadsPage({ searchParams }: Props) {
       <form className="admin-row admin-filter-bar" method="get"><input name="q" defaultValue={q} placeholder="Search name, email, phone" aria-label="Search leads" />
         <select name="stage" defaultValue={stage} aria-label="Filter stage"><option value="">All stages</option>{stages.map(s => <option key={s} value={s}>{stageName(s)}</option>)}</select>
         <button className="admin-button">Filter</button></form>
-      <div className="admin-card admin-table-scroll" style={{ padding: 0 }} role="region" aria-label="Leads table" tabIndex={0}><table className="admin-table"><thead><tr><th>Name</th><th>Interest</th><th>Stage</th><th>Source</th><th>Received</th><th>Next action</th></tr></thead><tbody>
+      <div className="admin-card admin-table-scroll" style={{ padding: 0 }} role="region" aria-label="Leads table" tabIndex={0}><table className="admin-table"><thead><tr><th>Name</th><th>Interest</th><th>Stage</th><th>Source</th><th>Received</th><th>Follow-up 1</th><th>Follow-up 2</th><th>Next action</th></tr></thead><tbody>
         {leads.map(lead => <tr key={lead.id}><td><Link className="admin-link" href={`/admin/leads/${lead.id}`}>{lead.name}</Link><br /><small>{lead.email || lead.phone || "—"}</small></td>
           <td>{lead.interest || "—"}</td><td><span className={`admin-status admin-status--${lead.stage}`}>{stageName(lead.stage)}</span></td>
           <td>{lead.source === "offline" ? "Offline" : "Website"}</td><td>{istDate(lead.created_at)}</td>
-          <td>{lead.follow_up_at ? `Follow up ${istDateTime(lead.follow_up_at)}` : lead.tour_at ? `Tour ${istDateTime(lead.tour_at)}` : "—"}</td></tr>)}
+          <td><FollowUp at={lead.follow_up_at} outcome={lead.follow_up_1_outcome} /></td><td><FollowUp at={lead.follow_up_2_at} outcome={lead.follow_up_2_outcome} /></td>
+          <td>{nextAction(lead)}</td></tr>)}
       </tbody></table>{!leads.length && <p style={{ padding: "1rem" }}>No matching leads.</p>}</div>
       <div className="admin-row" style={{ marginTop: "1rem" }}><span>{count} matching leads</span>
         {currentPage > 1 && <Link className="admin-link" href={pageUrl(currentPage - 1)}>Previous</Link>}
@@ -54,16 +66,24 @@ export default async function LeadsPage({ searchParams }: Props) {
 }
 
 async function loadLeads(client: ReturnType<typeof db>, needle: string, stage: string, currentPage: number) {
-  let query = client.from("leads").select("id,name,email,phone,interest,stage,source,created_at,follow_up_at,tour_at", { count: "exact" })
-    .order("created_at", { ascending: false });
-  if (stages.includes(stage as typeof stages[number])) query = query.eq("stage", stage);
-  if (needle) {
-    const filters = ["name", "email", "phone", "interest"].map(field => `${field}.ilike.%${needle}%`);
-    const phone = phoneSearchPattern(needle);
-    if (phone) filters.push(`phone.ilike.${phone}`);
-    query = query.or(filters.join(","));
-  }
-  const { data, error, count } = await query.range((currentPage - 1) * 50, currentPage * 50 - 1);
-  if (error) throw error;
-  return { leads: data || [], count: count || 0 };
+  const base = "id,name,email,phone,interest,stage,source,created_at,follow_up_at,tour_at";
+  const withFollowUps = `${base},follow_up_1_outcome,follow_up_2_at,follow_up_2_outcome`;
+  const run = async (columns: string) => {
+    let query = client.from("leads").select(columns, { count: "exact" }).order("created_at", { ascending: false });
+    if (stages.includes(stage as typeof stages[number])) query = query.eq("stage", stage);
+    if (needle) {
+      const filters = ["name", "email", "phone", "interest"].map(field => `${field}.ilike.%${needle}%`);
+      const phone = phoneSearchPattern(needle);
+      if (phone) filters.push(`phone.ilike.${phone}`);
+      query = query.or(filters.join(","));
+    }
+    return query.range((currentPage - 1) * 50, currentPage * 50 - 1);
+  };
+  let result = await run(withFollowUps);
+  // 42703 = column missing: the follow-up migration has not been run yet, so keep the page working without those columns.
+  if (result.error?.code === "42703") result = await run(base);
+  if (result.error) throw result.error;
+  const leads = ((result.data || []) as unknown as Partial<FollowUpFields & { id: string; name: string; email: string; phone: string | null; interest: string | null; stage: string; source: string; created_at: string }>[])
+    .map(lead => ({ follow_up_1_outcome: null, follow_up_2_at: null, follow_up_2_outcome: null, ...lead })) as (FollowUpFields & { id: string; name: string; email: string; phone: string | null; interest: string | null; stage: string; source: string; created_at: string })[];
+  return { leads, count: result.count || 0 };
 }

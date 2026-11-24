@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db, requireActor } from "@/lib/supabase";
 import { createHash } from "node:crypto";
-import { stages } from "@/lib/content";
+import { stages, followUpOutcomes } from "@/lib/content";
 import { leadCsvColumns, readCsvLead } from "@/lib/leads-csv";
 
 export async function updateLead(formData: FormData) {
@@ -19,11 +19,25 @@ export async function updateLead(formData: FormData) {
     return new Date(timestamp).toISOString();
   };
   const assigned = String(formData.get("assigned_to") || "");
-  const { data: saved, error } = await db().from("leads").update({ stage, follow_up_at: date("follow_up_at"), tour_at: date("tour_at"),
-    assigned_to: assigned || null, updated_at: new Date().toISOString() }).eq("id", id).select("id").maybeSingle();
+  const outcome = (key: string) => {
+    const value = String(formData.get(key) || "");
+    return (followUpOutcomes as readonly string[]).includes(value) ? value : null;
+  };
+  const note = (key: string) => String(formData.get(key) || "").trim().slice(0, 500) || null;
+  const core = { stage, follow_up_at: date("follow_up_at"), tour_at: date("tour_at"), assigned_to: assigned || null, updated_at: new Date().toISOString() };
+  const followUps = { follow_up_1_outcome: outcome("follow_up_1_outcome"), follow_up_1_note: note("follow_up_1_note"),
+    follow_up_2_at: date("follow_up_2_at"), follow_up_2_outcome: outcome("follow_up_2_outcome"), follow_up_2_note: note("follow_up_2_note") };
+  const client = db();
+  let { data: saved, error } = await client.from("leads").update({ ...core, ...followUps }).eq("id", id).select("id").maybeSingle();
+  let notice = "";
+  // Missing column (42703 / PGRST204): the follow-up migration has not been run, so save the rest and say so.
+  if (error && (error.code === "42703" || error.code === "PGRST204")) {
+    ({ data: saved, error } = await client.from("leads").update(core).eq("id", id).select("id").maybeSingle());
+    notice = "&notice=migration";
+  }
   if (error || !saved) throw new Error("Could not save this lead. Refresh and try again.");
   revalidatePath("/admin/leads");
-  redirect(`/admin/leads/${id}?saved=1`);
+  redirect(`/admin/leads/${id}?saved=1${notice}`);
 }
 
 export async function addNote(formData: FormData) {
