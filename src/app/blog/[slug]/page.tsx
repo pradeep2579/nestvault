@@ -48,6 +48,7 @@ export default async function ArticlePage({ params }: Props) {
         </header>
         {post.cover_url && <figure className="article-cover" role="img" aria-label={post.cover_alt || post.title} style={{ backgroundImage: `url(${post.cover_url})` }} />}
         <div className="article-content" dangerouslySetInnerHTML={{ __html: safeHtml(post.body_html) }} />
+        {post.button_url && post.button_label && <div className="article-button"><a href={post.button_url} className="btn-gold" target={post.button_url.startsWith("/") ? undefined : "_blank"} rel="noopener noreferrer">{post.button_label} ↗</a></div>}
         <div className="article-share"><span>Share this article</span>
           <a href={`https://wa.me/?text=${shareText}%20${shareUrl}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
           <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>

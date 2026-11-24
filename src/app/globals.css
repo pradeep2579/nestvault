@@ -401,6 +401,7 @@ body {
    transition:transform .2s,box-shadow .2s; }
  .article-content a.article-btn::after,.article-content p:has(> a:only-child:not(:has(*))) > a:only-child::after { content:"↗"; }
  .article-content a.article-btn:hover,.article-content p:has(> a:only-child:not(:has(*))) > a:only-child:hover { color:#fff; transform:translateY(-1px); box-shadow:0 8px 24px rgba(201,168,76,.4); }
+ .article-button { margin:2.5rem 0 0; }
  .article-share { display:flex; flex-wrap:wrap; align-items:center; gap:.75rem; margin:3rem 0; padding:1.25rem 0; border-top:1px solid rgba(5,22,80,.12); border-bottom:1px solid rgba(5,22,80,.12); font-size:.9rem; }
  .article-share span { opacity:.65; margin-right:.5rem; }
  .article-share a { padding:.45rem 1rem; border:1px solid rgba(5,22,80,.25); color:#051650; }

@@ -16,6 +16,11 @@ export async function savePost(formData: FormData) {
   const intent = String(formData.get("intent") || "draft");
   const editPath = id ? `/admin/blog/${id}` : "/admin/blog/new";
   if (!title || !slug || !["draft", "publish", "schedule"].includes(intent)) redirect(`${editPath}?error=article`);
+  const buttonLabel = String(formData.get("button_label") || "").trim().slice(0, 60);
+  const rawButtonUrl = String(formData.get("button_url") || "").trim();
+  const buttonUrl = cleanUrl(rawButtonUrl);
+  if (rawButtonUrl && !buttonUrl) redirect(`${editPath}?error=url`);
+  if (buttonUrl && !buttonLabel) redirect(`${editPath}?error=button`);
   if (["cover_url", "canonical_url", "social_image"].some(key => String(formData.get(key) || "").trim() && !cleanUrl(String(formData.get(key)))))
     redirect(`${editPath}?error=url`);
   if (intent !== "draft" && current.role !== "owner") throw new Error("Only owners can publish");
@@ -39,6 +44,8 @@ export async function savePost(formData: FormData) {
     social_image: cleanUrl(String(formData.get("social_image") || "").slice(0, 1000)),
     noindex: formData.get("noindex") === "on", schema_type: "BlogPosting",
     updated_at: new Date().toISOString() };
+  // Only touch the button columns when used, so saving still works before the migration is applied.
+  if (buttonUrl || formData.get("had_button")) Object.assign(payload, { button_label: buttonUrl ? buttonLabel : null, button_url: buttonUrl });
   const client = db();
   const result = id ? await client.from("posts").update(payload).eq("id", id).select("id").single()
     : await client.from("posts").insert({ ...payload, author_id: current.id }).select("id").single();
