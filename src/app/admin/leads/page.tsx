@@ -66,16 +66,24 @@ export default async function LeadsPage({ searchParams }: Props) {
 }
 
 async function loadLeads(client: ReturnType<typeof db>, needle: string, stage: string, currentPage: number) {
-  let query = client.from("leads").select("id,name,email,phone,interest,stage,source,created_at,follow_up_at,follow_up_1_outcome,follow_up_2_at,follow_up_2_outcome,tour_at", { count: "exact" })
-    .order("created_at", { ascending: false });
-  if (stages.includes(stage as typeof stages[number])) query = query.eq("stage", stage);
-  if (needle) {
-    const filters = ["name", "email", "phone", "interest"].map(field => `${field}.ilike.%${needle}%`);
-    const phone = phoneSearchPattern(needle);
-    if (phone) filters.push(`phone.ilike.${phone}`);
-    query = query.or(filters.join(","));
-  }
-  const { data, error, count } = await query.range((currentPage - 1) * 50, currentPage * 50 - 1);
-  if (error) throw error;
-  return { leads: data || [], count: count || 0 };
+  const base = "id,name,email,phone,interest,stage,source,created_at,follow_up_at,tour_at";
+  const withFollowUps = `${base},follow_up_1_outcome,follow_up_2_at,follow_up_2_outcome`;
+  const run = async (columns: string) => {
+    let query = client.from("leads").select(columns, { count: "exact" }).order("created_at", { ascending: false });
+    if (stages.includes(stage as typeof stages[number])) query = query.eq("stage", stage);
+    if (needle) {
+      const filters = ["name", "email", "phone", "interest"].map(field => `${field}.ilike.%${needle}%`);
+      const phone = phoneSearchPattern(needle);
+      if (phone) filters.push(`phone.ilike.${phone}`);
+      query = query.or(filters.join(","));
+    }
+    return query.range((currentPage - 1) * 50, currentPage * 50 - 1);
+  };
+  let result = await run(withFollowUps);
+  // 42703 = column missing: the follow-up migration has not been run yet, so keep the page working without those columns.
+  if (result.error?.code === "42703") result = await run(base);
+  if (result.error) throw result.error;
+  const leads = ((result.data || []) as unknown as Partial<FollowUpFields & { id: string; name: string; email: string; phone: string | null; interest: string | null; stage: string; source: string; created_at: string }>[])
+    .map(lead => ({ follow_up_1_outcome: null, follow_up_2_at: null, follow_up_2_outcome: null, ...lead })) as (FollowUpFields & { id: string; name: string; email: string; phone: string | null; interest: string | null; stage: string; source: string; created_at: string })[];
+  return { leads, count: result.count || 0 };
 }

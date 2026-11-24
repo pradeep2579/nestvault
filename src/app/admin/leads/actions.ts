@@ -28,6 +28,7 @@ export async function updateLead(formData: FormData) {
     follow_up_1_outcome: outcome("follow_up_1_outcome"), follow_up_1_note: note("follow_up_1_note"),
     follow_up_2_at: date("follow_up_2_at"), follow_up_2_outcome: outcome("follow_up_2_outcome"), follow_up_2_note: note("follow_up_2_note"),
     assigned_to: assigned || null, updated_at: new Date().toISOString() }).eq("id", id).select("id").maybeSingle();
+  if (error?.code === "42703") throw new Error("Follow-up fields need a one-time database update. Ask your developer to run the follow-up migration.");
   if (error || !saved) throw new Error("Could not save this lead. Refresh and try again.");
   revalidatePath("/admin/leads");
   redirect(`/admin/leads/${id}?saved=1`);
