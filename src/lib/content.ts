@@ -7,8 +7,12 @@ export type Stage = typeof stages[number];
 export function safeHtml(html: string) {
   return sanitizeHtml(html, {
     allowedTags: [...sanitizeHtml.defaults.allowedTags, "h1", "h2", "h3", "img"],
-    allowedAttributes: { ...sanitizeHtml.defaults.allowedAttributes, a: ["href", "target", "rel"], img: ["src", "alt", "width", "height"] },
+    allowedAttributes: { ...sanitizeHtml.defaults.allowedAttributes, a: ["href", "target", "rel", "class"], img: ["src", "alt", "width", "height"] },
+    allowedClasses: { a: ["article-btn"] },
     allowedSchemes: ["http", "https", "mailto"],
+    // Links to other sites open in a new tab safely.
+    transformTags: { a: (tagName, attribs) => /^https?:\/\//i.test(attribs.href || "")
+      ? { tagName, attribs: { ...attribs, target: "_blank", rel: "noopener noreferrer" } } : { tagName, attribs } },
   });
 }
 

@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { publicPost } from "@/lib/public-data";
-import { absoluteUrl } from "@/lib/content";
+import { publicPost, publicPosts } from "@/lib/public-data";
+import { absoluteUrl, safeHtml } from "@/lib/content";
 import Link from "next/link";
 
 // Cached for 5 minutes (so scheduled posts appear on time); admin saves refresh it immediately via revalidatePath.
@@ -27,19 +27,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ArticlePage({ params }: Props) {
   const post = await publicPost((await params).slug);
   if (!post) notFound();
+  const more = (await publicPosts(4)).filter(item => item.slug !== post.slug).slice(0, 3);
+  const shareUrl = encodeURIComponent(absoluteUrl(`/blog/${post.slug}`));
+  const shareText = encodeURIComponent(post.title);
+  const date = post.published_at && new Date(post.published_at).toLocaleDateString("en-IN", { dateStyle: "long" });
   const jsonLd = { "@context": "https://schema.org", "@type": post.schema_type,
     headline: post.title, description: post.seo_description || post.excerpt,
     image: post.cover_url ? absoluteUrl(post.cover_url) : undefined,
     datePublished: post.published_at, dateModified: post.updated_at,
     mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`), publisher: { "@type": "Organization", name: "Nest Vault", logo: absoluteUrl("/images/logo-full.png") } };
   return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-    <Navbar /><main style={{ padding: "8rem 1.5rem 5rem", background: "#f6f3ed", color: "#051650", minHeight: "70vh" }}>
-      <article style={{ maxWidth: 800, margin: "0 auto" }}>
-        <Link href="/blog" style={{ color: "#9b7934" }}>← All articles</Link>
-        <h1 style={{ fontSize: "clamp(2.3rem,5vw,4rem)", lineHeight: 1.1, margin: "2rem 0 1rem" }}>{post.title}</h1>
-        <p style={{ opacity: 0.65 }}>{post.published_at && new Date(post.published_at).toLocaleDateString("en-IN", { dateStyle: "long" })}</p>
-        {post.cover_url && <div role="img" aria-label={post.cover_alt || post.title} style={{ marginTop: "2rem", aspectRatio: "16 / 9", background: `center / cover url(${post.cover_url})` }} />}
-        <div className="article-content" dangerouslySetInnerHTML={{ __html: post.body_html }} />
+    <Navbar />
+    <main className="article-page">
+      <article className="article-wrap">
+        <Link href="/blog" className="article-back">← All articles</Link>
+        <header className="article-header">
+          <p className="article-eyebrow">Nest Vault Journal{date && <> · <time dateTime={post.published_at || undefined}>{date}</time></>}</p>
+          <h1>{post.title}</h1>
+          {post.excerpt && <p className="article-lede">{post.excerpt}</p>}
+        </header>
+        {post.cover_url && <figure className="article-cover" role="img" aria-label={post.cover_alt || post.title} style={{ backgroundImage: `url(${post.cover_url})` }} />}
+        <div className="article-content" dangerouslySetInnerHTML={{ __html: safeHtml(post.body_html) }} />
+        <div className="article-share"><span>Share this article</span>
+          <a href={`https://wa.me/?text=${shareText}%20${shareUrl}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href={`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareText}`} target="_blank" rel="noopener noreferrer">X</a></div>
+        <aside className="article-cta"><div><h2>Ready to see Nest Vault in person?</h2><p>Book a tour of our Jubilee Hills coworking space and find the workspace that fits your team.</p></div>
+          <div className="article-cta-actions"><Link href="/#contact" className="btn-gold">Book a tour</Link><a href="tel:+919142696666" className="article-cta-phone">+91 91426 96666</a></div></aside>
       </article>
+      {more.length > 0 && <section className="article-more" aria-label="More articles"><h2>Keep reading</h2>
+        <div className="article-more-grid">{more.map(item => <Link key={item.id} href={`/blog/${item.slug}`} className="article-more-card">
+          {item.cover_url && <span className="article-more-img" style={{ backgroundImage: `url(${item.cover_url})` }} />}
+          <strong>{item.title}</strong><span>Read article →</span></Link>)}</div></section>}
     </main><Footer /></>;
 }
