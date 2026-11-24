@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { istDateTime } from "@/lib/format";
 import { db } from "@/lib/supabase";
-import { stages } from "@/lib/content";
+import { stages, followUpOutcomes } from "@/lib/content";
 import { addNote, updateLead, updateLeadDetails } from "../actions";
 import DeleteLeadButton from "@/components/admin/DeleteLeadButton";
 import { requirePageActor } from "@/lib/admin-page";
@@ -51,7 +51,12 @@ export default async function LeadDetail({ params, searchParams }: Props) {
         <input type="hidden" name="id" value={id} />
         <label>Stage<select name="stage" defaultValue={lead.stage}>{stages.map(s => <option key={s} value={s}>{s.replaceAll("_", " ")}</option>)}</select></label>
         <label>Assigned to<select name="assigned_to" defaultValue={lead.assigned_to || ""}><option value="">Unassigned</option>{(staff || []).map(s => <option key={s.id} value={s.id}>{s.email}</option>)}</select></label>
-        <label>Follow up (India time)<input type="datetime-local" name="follow_up_at" defaultValue={inputDate(lead.follow_up_at)} /></label>
+        {([1, 2] as const).map(n => { const at = n === 1 ? lead.follow_up_at : lead.follow_up_2_at;
+          return <fieldset key={n} className="admin-form" style={{ border: "1px solid #e4e9f0", borderRadius: 8, padding: "0.75rem" }}><legend>Follow-up {n}</legend>
+            <label>Date & time (India time)<input type="datetime-local" name={n === 1 ? "follow_up_at" : "follow_up_2_at"} defaultValue={inputDate(at)} /></label>
+            <label>What the lead did<select name={`follow_up_${n}_outcome`} defaultValue={lead[`follow_up_${n}_outcome`] || ""}><option value="">Not yet followed up</option>
+              {followUpOutcomes.map(item => <option key={item} value={item}>{item}</option>)}</select></label>
+            <label>Note<input name={`follow_up_${n}_note`} defaultValue={lead[`follow_up_${n}_note`] || ""} maxLength={500} placeholder="e.g. Wants a tour on Saturday" /></label></fieldset>; })}
         <label>Tour time (India time)<input type="datetime-local" name="tour_at" defaultValue={inputDate(lead.tour_at)} /></label><button>Save lead</button>
       </form></section>
     </div><section className="admin-card" style={{ marginTop: "1.5rem" }}><h2>Notes</h2>
