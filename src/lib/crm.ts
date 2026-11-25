@@ -28,7 +28,7 @@ export function deriveChannel(input: { utm_source?: string | null; utm_medium?: 
   if (source.includes("google") || (!source && /(^|\.)google\./.test(host))) return (paid ? "Google Ads" : "Google search") as typeof channels[number];
   for (const rule of channelRules) if (rule.tokens.test(source) || (!source && rule.tokens.test(host))) return rule.channel;
   if (source || host) return "Other website";
-  return "Direct / unknown";
+  return "Own website";
 }
 
 // ---- stage requirements ----
@@ -112,7 +112,7 @@ export function summarize(leads: InsightLead[], now: Date, assigneeName: (id: st
     untouched: flags.filter(f => f.untouched).length, unassigned: flags.filter(f => f.unassigned).length,
     wonMonthlyValue: won.reduce((sum, l) => sum + (Number(l.won_value) || 0), 0),
     funnel: labels.map((label, i) => ({ label, count: counts[i], pct: total ? counts[i] / total : 0 })),
-    byChannel: [...group(l => l.channel || "Direct / unknown")].map(([channel, items]) => ({ channel, leads: items.length, toured: items.filter(toured).length, won: items.filter(l => l.stage === "won").length }))
+    byChannel: [...group(l => l.channel || "Own website")].map(([channel, items]) => ({ channel, leads: items.length, toured: items.filter(toured).length, won: items.filter(l => l.stage === "won").length }))
       .sort((a, b) => b.leads - a.leads),
     byAssignee: [...group(l => assigneeName(l.assigned_to))].map(([name, items]) => ({ name, leads: items.length, open: items.filter(l => isOpen(l.stage)).length,
       won: items.filter(l => l.stage === "won").length, overdue: items.filter(l => attention(l, now).overdue).length })).sort((a, b) => b.leads - a.leads),

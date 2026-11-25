@@ -25,7 +25,7 @@ create index if not exists leads_follow_up_idx on public.leads(follow_up_at) whe
 
 update public.leads set first_contacted_at = updated_at where stage <> 'new' and first_contacted_at is null;
 update public.leads set tour_completed_at = coalesce(tour_at, updated_at) where stage = 'tour_completed' and tour_completed_at is null;
-update public.leads set channel = case when source = 'offline' then 'Other' else 'Direct / unknown' end where channel is null;
+update public.leads set channel = case when source = 'offline' then 'Other' else 'Own website' end where channel is null;
 
 create table if not exists public.lead_activity (
   id uuid primary key default gen_random_uuid(),
