@@ -38,7 +38,7 @@ describe("lead CSV", () => {
     expect(readCsvLead(columns, ["Asha", "asha@example.com", "walk-in", "within 1 month", "₹5,000 - ₹15,000 / month"]))
       .toMatchObject({ channel: "Walk-in", move_in: "Within 1 month", budget: "₹5,000 - ₹15,000 / month" });
     expect(() => readCsvLead(columns, ["Asha", "asha@example.com", "billboard", "", ""])).toThrow("Invalid channel");
-    expect(readCsvLead(columns, ["Asha", "asha@example.com", "Direct / unknown", "", ""]).channel).toBe("Own website");
+    expect(readCsvLead(columns, ["Asha", "asha@example.com", "Direct / unknown", "", ""]).channel).toBe("Website");
     expect(readCsvLead(importColumns(["name", "email"]), ["Asha", "asha@example.com"])).toMatchObject({ channel: null, move_in: null, budget: null });
     expect(Object.keys(leadRecord(readCsvLead(importColumns(["name", "email"]), ["Asha", "asha@example.com"])))).not.toContain("channel");
   });

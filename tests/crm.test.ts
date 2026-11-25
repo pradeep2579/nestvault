@@ -4,7 +4,7 @@ import { channels } from "../src/lib/content";
 
 const now = new Date("2026-11-24T10:00:00Z"); // 15:30 IST
 const base: InsightLead = { stage: "new", created_at: "2026-11-24T09:00:00Z", assigned_to: "a", follow_up_at: null, follow_up_1_outcome: null, follow_up_2_at: null,
-  follow_up_2_outcome: null, first_contacted_at: null, tour_at: null, tour_completed_at: null, channel: "Own website", lost_reason: null, won_value: null };
+  follow_up_2_outcome: null, first_contacted_at: null, tour_at: null, tour_completed_at: null, channel: "Website", lost_reason: null, won_value: null };
 
 describe("phone helpers", () => {
   it("validates length and matches the same number written differently", () => {
@@ -21,8 +21,8 @@ describe("deriveChannel", () => {
     expect(deriveChannel({ referrer: "https://www.google.com/" })).toBe("Google search");
     expect(deriveChannel({ referrer: "https://l.facebook.com/x" })).toBe("Facebook");
     expect(deriveChannel({ referrer: "https://blog.example.com/post" })).toBe("Other website");
-    expect(deriveChannel({ referrer: "https://nestvault.in/blog" })).toBe("Own website");
-    expect(deriveChannel({})).toBe("Own website");
+    expect(deriveChannel({ referrer: "https://nestvault.in/blog" })).toBe("Website");
+    expect(deriveChannel({})).toBe("Website");
     for (const input of [{ utm_source: "x" }, { referrer: "https://t.co" }, {}]) expect(channels).toContain(deriveChannel(input));
   });
 });

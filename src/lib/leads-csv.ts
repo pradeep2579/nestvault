@@ -85,7 +85,7 @@ export function readCsvLead(columns: string[], values: string[]): CsvLead {
     return match;
   };
   const pick = (key: string, allowed: readonly string[]) => {
-    const value = (row[key] || "").toLowerCase().replace("direct / unknown", "own website"); // older exports used the previous name
+    const value = (row[key] || "").toLowerCase().replace(/^(direct \/ unknown|own website)$/, "website"); // older exports used earlier names
     if (!value) return null;
     const match = allowed.find(item => item.toLowerCase() === value);
     if (!match) throw new Error(`Invalid ${key}`);
